@@ -1,15 +1,17 @@
-use crate::io::{
-    dma_file::{align_down, align_up},
-    DmaFile, ReadResult, ScheduledSource,
-};
 use core::task::{Context, Poll};
-use futures_lite::{ready, Stream, StreamExt};
 use std::{
     cmp::{max, min},
     collections::VecDeque,
     os::unix::io::AsRawFd,
     pin::Pin,
     rc::Rc,
+};
+
+use futures_lite::{ready, Stream, StreamExt};
+
+use crate::io::{
+    dma_file::{align_down, align_up},
+    DmaFile, ReadResult, ScheduledSource,
 };
 
 /// Set a limit to the size of merged IO requests.
@@ -523,8 +525,9 @@ impl<V: IoVec + Unpin, S: Stream<Item = (ScheduledSource, ReadManyArgs<V>)> + Un
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use futures_lite::{stream, StreamExt};
+
+    use super::*;
 
     async fn collect_iovecs<V: IoVec, S: Stream<Item = MergedIOVecs<V>> + Unpin>(
         stream: S,

@@ -1,5 +1,6 @@
-use crate::uring_sys;
 use std::{io, ptr::NonNull};
+
+use crate::uring_sys;
 
 /// A probe of the operations supported by this kernel version's io-uring
 /// interface.

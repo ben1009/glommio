@@ -5,21 +5,21 @@
 /// `!Send` limitation makes it harder to deal with high level hyper primitives,
 /// but it works in the end.
 mod hyper_compat {
-    use futures_lite::{AsyncRead, AsyncWrite, Future};
-    use hyper::service::service_fn;
     use std::{
+        io,
         net::SocketAddr,
         pin::Pin,
+        rc::Rc,
         task::{Context, Poll},
     };
 
+    use futures_lite::{AsyncRead, AsyncWrite, Future};
     use glommio::{
         enclose,
         net::{TcpListener, TcpStream},
         sync::Semaphore,
     };
-    use hyper::{server::conn::Http, Body, Request, Response};
-    use std::{io, rc::Rc};
+    use hyper::{server::conn::Http, service::service_fn, Body, Request, Response};
     use tokio::io::ReadBuf;
 
     #[derive(Clone)]
@@ -105,9 +105,10 @@ mod hyper_compat {
     }
 }
 
+use std::convert::Infallible;
+
 use glommio::{CpuSet, LocalExecutorPoolBuilder, PoolPlacement};
 use hyper::{Body, Method, Request, Response, StatusCode};
-use std::convert::Infallible;
 
 async fn hyper_demo(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     match (req.method(), req.uri().path()) {

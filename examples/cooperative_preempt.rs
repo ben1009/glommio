@@ -1,10 +1,11 @@
-use futures::join;
-use glommio::prelude::*;
 use std::{
     cell::RefCell,
     rc::Rc,
     time::{Duration, Instant},
 };
+
+use futures::join;
+use glommio::prelude::*;
 
 /// Glommio is a cooperative thread per core system so once you start
 /// processing a future it will run it to completion. This is not great
@@ -17,21 +18,18 @@ use std::{
 ///
 /// There are three ways of yielding control:
 ///
-///  * [`glommio::executor().yield_if_needed()`], which will yield if the
-///    current task queue has run for too long. What "too long" means is an
-///    implementation detail, but it will be always somehow related to the
-///    latency guarantees that the task queues want to uphold in their
-///    [`Latency::Matters`] parameter (or [`Latency::NotImportant`]). To check
-///    whether preemption is needed without yielding automatically, use
-///    [`glommio::executor().need_preempt()`].
+///  * [`glommio::executor().yield_if_needed()`], which will yield if the current task queue has run
+///    for too long. What "too long" means is an implementation detail, but it will be always
+///    somehow related to the latency guarantees that the task queues want to uphold in their
+///    [`Latency::Matters`] parameter (or [`Latency::NotImportant`]). To check whether preemption is
+///    needed without yielding automatically, use [`glommio::executor().need_preempt()`].
 ///
-///  * [`glommio::executor().yield_task_queue_now()`], works like
-///    yield_if_needed() but yields unconditionally.
+///  * [`glommio::executor().yield_task_queue_now()`], works like yield_if_needed() but yields
+///    unconditionally.
 ///
-///  * [`glommio::executor().yield_now()`], which unconditional yield the
-///    current task within the current task queue, forcing the scheduler to run
-///    another task on the same task queue. This is equivalent to returning
-///    `Poll::Pending` and waking up the current task.
+///  * [`glommio::executor().yield_now()`], which unconditional yield the current task within the
+///    current task queue, forcing the scheduler to run another task on the same task queue. This is
+///    equivalent to returning `Poll::Pending` and waking up the current task.
 ///
 /// Because [`yield_if_needed()`] returns a future that has to be .awaited,
 /// it cannot be used in situations where .await is illegal. For

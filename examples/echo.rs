@@ -3,12 +3,13 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
+use std::{io::Result, rc::Rc, time::Instant};
+
 use futures_lite::{AsyncReadExt, AsyncWriteExt};
 use glommio::{
     net::{TcpListener, TcpStream},
     prelude::*,
 };
-use std::{io::Result, rc::Rc, time::Instant};
 
 async fn server(conns: usize) -> Result<()> {
     let listener = Rc::new(TcpListener::bind("127.0.0.1:10000").unwrap());

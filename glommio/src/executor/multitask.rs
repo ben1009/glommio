@@ -8,11 +8,6 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, missing_debug_implementations)]
 
-use crate::{
-    executor::{maybe_activate, TaskQueue},
-    task::{task_impl, JoinHandle},
-    Latency,
-};
 use std::{
     cell::RefCell,
     collections::VecDeque,
@@ -22,6 +17,12 @@ use std::{
     pin::Pin,
     rc::Rc,
     task::{Context, Poll},
+};
+
+use crate::{
+    executor::{maybe_activate, TaskQueue},
+    task::{task_impl, JoinHandle},
+    Latency,
 };
 
 /// A runnable future, ready for execution.

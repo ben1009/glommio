@@ -1,13 +1,15 @@
-use crate::{
-    io::glommio_file::Identity,
-    sys::{Reactor, Source},
-    IoRequirements,
-};
-use intrusive_collections::{intrusive_adapter, Bound, KeyAdapter, RBTree, RBTreeLink};
 use std::{
     cell::{Cell, RefCell},
     ops::{Deref, Range},
     rc::{Rc, Weak},
+};
+
+use intrusive_collections::{intrusive_adapter, Bound, KeyAdapter, RBTree, RBTreeLink};
+
+use crate::{
+    io::glommio_file::Identity,
+    sys::{Reactor, Source},
+    IoRequirements,
 };
 
 #[derive(Debug)]
@@ -74,6 +76,7 @@ struct FileSchedulerInner {
 intrusive_adapter!(FileSchedulerAdapter = Rc<FileSchedulerInner>: FileSchedulerInner { link: RBTreeLink });
 impl<'a> KeyAdapter<'a> for FileSchedulerAdapter {
     type Key = Identity;
+
     fn get_key(&self, s: &'a FileSchedulerInner) -> Self::Key {
         s.identity
     }
@@ -147,7 +150,7 @@ impl FileScheduler {
                         .clone_pointer()
                         .unwrap(),
                     file: Rc::downgrade(&self.inner),
-                    offseted_range: offset_start..offset_start + data_range.end,
+                    offsetted_range: offset_start..offset_start + data_range.end,
                 })
             }
         } else {
@@ -165,7 +168,7 @@ impl FileScheduler {
         ScheduledSource {
             inner: scheduled,
             file: Rc::downgrade(&self.inner),
-            offseted_range: 0..data_range.end - data_range.start,
+            offsetted_range: 0..data_range.end - data_range.start,
         }
     }
 }
@@ -180,6 +183,7 @@ struct ScheduledSourceInner {
 intrusive_adapter!(ScheduledSourceAdapter = Rc<ScheduledSourceInner>: ScheduledSourceInner { link: RBTreeLink });
 impl<'a> KeyAdapter<'a> for ScheduledSourceAdapter {
     type Key = u64;
+
     fn get_key(&self, s: &'a ScheduledSourceInner) -> Self::Key {
         s.data_range.start
     }
@@ -189,7 +193,7 @@ impl<'a> KeyAdapter<'a> for ScheduledSourceAdapter {
 pub struct ScheduledSource {
     inner: Rc<ScheduledSourceInner>,
     file: Weak<FileSchedulerInner>,
-    offseted_range: Range<u64>,
+    offsetted_range: Range<u64>,
 }
 
 impl ScheduledSource {
@@ -201,7 +205,7 @@ impl ScheduledSource {
                 data_range: data_range.clone(),
             }),
             file: Default::default(),
-            offseted_range: 0..data_range.end - data_range.start,
+            offsetted_range: 0..data_range.end - data_range.start,
         }
     }
 
@@ -211,8 +215,8 @@ impl ScheduledSource {
                 .source
                 .buffer()
                 .as_ptr()
-                .add(self.offseted_range.start as usize),
-            (self.offseted_range.end - self.offseted_range.start) as usize,
+                .add(self.offsetted_range.start as usize),
+            (self.offsetted_range.end - self.offsetted_range.start) as usize,
         )
     }
 }
@@ -240,17 +244,19 @@ impl Drop for ScheduledSource {
 #[cfg(test)]
 #[macro_use]
 pub(crate) mod test {
+    use std::rc::Rc;
+
+    use futures::join;
+
     use super::*;
     use crate::{
         io::{DmaFile, OpenOptions, ReadResult},
         sys::SourceType,
         test_utils::make_test_directories,
     };
-    use futures::join;
-    use std::rc::Rc;
 
     macro_rules! dma_file_test {
-        ( $name:ident, $dir:ident, $kind:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(&format!("dma-{}", stringify!($name))) {

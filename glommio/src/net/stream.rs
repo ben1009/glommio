@@ -3,12 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{
-    reactor::Reactor,
-    sys::{self, Source, SourceType},
-};
-use futures_lite::ready;
-use nix::sys::socket::MsgFlags;
 use std::{
     cell::Cell,
     io,
@@ -17,6 +11,14 @@ use std::{
     rc::{Rc, Weak},
     task::{Context, Poll, Waker},
     time::{Duration, Instant},
+};
+
+use futures_lite::ready;
+use nix::sys::socket::MsgFlags;
+
+use crate::{
+    reactor::Reactor,
+    sys::{self, Source, SourceType},
 };
 
 type Result<T> = crate::Result<T, ()>;

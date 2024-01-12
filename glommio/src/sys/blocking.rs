@@ -1,12 +1,5 @@
-use crate::{
-    executor::bind_to_cpu_set,
-    sys::{InnerSource, SleepNotifier},
-    PoolPlacement,
-};
-use ahash::AHashMap;
 use alloc::rc::Rc;
 use core::fmt::{Debug, Formatter};
-use flume::{Receiver, Sender};
 use std::{
     cell::{Cell, RefCell},
     convert::{TryFrom, TryInto},
@@ -18,6 +11,15 @@ use std::{
     pin::Pin,
     sync::Arc,
     thread::JoinHandle,
+};
+
+use ahash::AHashMap;
+use flume::{Receiver, Sender};
+
+use crate::{
+    executor::bind_to_cpu_set,
+    sys::{InnerSource, SleepNotifier},
+    PoolPlacement,
 };
 
 // So hard to copy/clone io::Error, plus need to send between threads. Best to
@@ -46,7 +48,7 @@ fn cstr(path: &Path) -> io::Result<CString> {
 }
 
 macro_rules! c_str {
-    ( $path:expr ) => {
+    ($path:expr) => {
         match cstr($path) {
             Ok(x) => x,
             Err(_) => {
@@ -150,6 +152,7 @@ pub(super) struct BlockingThreadResp {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct BlockingThread(JoinHandle<()>);
 
 impl BlockingThread {

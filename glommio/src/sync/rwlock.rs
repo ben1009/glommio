@@ -34,8 +34,10 @@ use core::fmt::Debug;
 use std::{
     cell::{Ref, RefCell, RefMut},
     future::Future,
+    marker::PhantomPinned,
     ops::{Deref, DerefMut},
     pin::Pin,
+    ptr::NonNull,
     task::{Context, Poll, Waker},
 };
 
@@ -44,7 +46,6 @@ use intrusive_collections::{
 };
 
 use crate::{GlommioError, ResourceType};
-use std::{marker::PhantomPinned, ptr::NonNull};
 
 /// A type alias for the result of a lock method which can be suspended.
 pub type LockResult<T> = Result<T, GlommioError<()>>;
@@ -79,8 +80,8 @@ struct WaiterNode {
 struct WaiterPointerOps;
 
 unsafe impl PointerOps for WaiterPointerOps {
-    type Value = WaiterNode;
     type Pointer = NonNull<WaiterNode>;
+    type Value = WaiterNode;
 
     unsafe fn from_raw(&self, value: *const Self::Value) -> Self::Pointer {
         NonNull::new(value as *mut Self::Value).expect("Pointer to the value can not be null")
@@ -127,7 +128,7 @@ unsafe impl Adapter for WaiterAdapter {
         }
 
         let ptr = (value as *const u8).add(offset_of!(WaiterNode, link));
-        //null check is performed above
+        // null check is performed above
         core::ptr::NonNull::new_unchecked(ptr as *mut _)
     }
 
@@ -202,7 +203,7 @@ pub struct RwLock<T> {
 #[derive(Debug)]
 struct State {
     // Number of granted write access
-    // There can be only single writer, but we use u32 type to support reentrancy fot the lock
+    // There can be only single writer, but we use u32 type to support reentrancy for the lock
     // in future
     writers: u32,
     // Number of granted read accesses
@@ -507,9 +508,10 @@ impl<T> RwLock<T> {
     /// # Examples
     ///
     /// ```
+    /// use std::rc::Rc;
+    ///
     /// use futures::future::join;
     /// use glommio::{sync::RwLock, LocalExecutor};
-    /// use std::rc::Rc;
     ///
     /// let lock = Rc::new(RwLock::new(1));
     /// let c_lock = lock.clone();
@@ -712,12 +714,13 @@ impl<T> RwLock<T> {
     ///
     /// # Examples
     ///
-    ///```
+    /// ```
+    /// use std::{cell::RefCell, rc::Rc};
+    ///
     /// use glommio::{
     ///     sync::{RwLock, Semaphore},
     ///     LocalExecutor,
     /// };
-    /// use std::{cell::RefCell, rc::Rc};
     ///
     /// let lock = Rc::new(RwLock::new(()));
     /// let c_lock = lock.clone();
@@ -894,7 +897,7 @@ impl<T: Default> Default for RwLock<T> {
 
 impl<T> Drop for RwLock<T> {
     fn drop(&mut self) {
-        //Lifetime annotation prohibits guards to outlive RwLock so such unwrap is
+        // Lifetime annotation prohibits guards to outlive RwLock so such unwrap is
         // safe.
         self.close().unwrap();
         assert!(self.state.borrow().waiters_queue.is_empty());
@@ -903,12 +906,14 @@ impl<T> Drop for RwLock<T> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::{sync::rwlock::RwLock, timer::Timer, LocalExecutor};
-    use std::time::Duration;
+    use std::{cell::RefCell, rc::Rc, time::Duration};
 
-    use crate::sync::Semaphore;
-    use std::{cell::RefCell, rc::Rc};
+    use super::*;
+    use crate::{
+        sync::{rwlock::RwLock, Semaphore},
+        timer::Timer,
+        LocalExecutor,
+    };
 
     #[derive(Eq, PartialEq, Debug)]
     struct NonCopy(i32);
@@ -1080,7 +1085,7 @@ mod test {
             let pinger = crate::spawn_local(async move {
                 let mut prev = -1;
                 loop {
-                    //give a room for other fibers to participate
+                    // give a room for other fibers to participate
                     crate::executor().yield_task_queue_now().await;
 
                     let mut lock = ball2.write().await.unwrap();
@@ -1103,7 +1108,7 @@ mod test {
             let ponger = crate::spawn_local(async move {
                 let mut prev = -1;
                 loop {
-                    //give a room for other fibers to participate
+                    // give a room for other fibers to participate
                     crate::executor().yield_task_queue_now().await;
 
                     let mut lock = ball3.write().await.unwrap();
@@ -1131,7 +1136,7 @@ mod test {
                 let reader = crate::spawn_local(async move {
                     let mut prev = -1;
                     loop {
-                        //give a room for other fibers to participate
+                        // give a room for other fibers to participate
                         crate::executor().yield_task_queue_now().await;
                         let lock = ball.read().await.unwrap();
 

@@ -4,6 +4,7 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 use core::{fmt, future::Future, marker::PhantomData, mem, ptr::NonNull};
+use std::sync::atomic::Ordering;
 
 #[cfg(feature = "debugging")]
 use crate::task::debugging::TaskDebugger;
@@ -11,8 +12,6 @@ use crate::{
     dbg_context,
     task::{header::Header, raw::RawTask, state::*, JoinHandle},
 };
-
-use std::sync::atomic::Ordering;
 
 /// Creates a new local task.
 ///

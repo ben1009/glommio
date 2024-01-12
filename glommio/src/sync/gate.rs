@@ -154,10 +154,8 @@ impl GateInner {
 
 #[cfg(test)]
 mod tests {
-    use crate::{enclose, LocalExecutor};
-
     use super::*;
-    use crate::sync::Semaphore;
+    use crate::{enclose, sync::Semaphore, LocalExecutor};
 
     #[test]
     fn test_immediate_close() {

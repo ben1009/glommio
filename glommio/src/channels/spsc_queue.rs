@@ -306,6 +306,7 @@ pub(crate) trait BufferHalf {
 
 impl<T> BufferHalf for Producer<T> {
     type Item = T;
+
     fn buffer(&self) -> &Buffer<T> {
         &self.buffer
     }
@@ -361,6 +362,7 @@ impl<T> Producer<T> {
 
 impl<T> BufferHalf for Consumer<T> {
     type Item = T;
+
     fn buffer(&self) -> &Buffer<T> {
         &self.buffer
     }
@@ -403,8 +405,9 @@ impl<T> Consumer<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::thread;
+
+    use super::*;
 
     #[test]
     fn test_try_push() {

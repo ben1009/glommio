@@ -3,18 +3,21 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::error::{GlommioError, ResourceType};
 use std::{
     cell::RefCell,
     future::Future,
+    marker::PhantomPinned,
     pin::Pin,
+    ptr::NonNull,
+    rc::Rc,
     task::{Context, Poll, Waker},
 };
 
 use intrusive_collections::{
     container_of, linked_list::LinkOps, offset_of, Adapter, LinkedList, LinkedListLink, PointerOps,
 };
-use std::{marker::PhantomPinned, ptr::NonNull, rc::Rc};
+
+use crate::error::{GlommioError, ResourceType};
 
 type Result<T> = crate::error::Result<T, ()>;
 
@@ -39,8 +42,8 @@ struct WaiterNode {
 struct WaiterPointerOps;
 
 unsafe impl PointerOps for WaiterPointerOps {
-    type Value = WaiterNode;
     type Pointer = NonNull<WaiterNode>;
+    type Value = WaiterNode;
 
     unsafe fn from_raw(&self, value: *const Self::Value) -> Self::Pointer {
         NonNull::new(value as *mut Self::Value).expect("Passed in Pointer can not be null")
@@ -306,7 +309,7 @@ fn process_wakes(sem: &Semaphore, units: u64) {
 
     let mut cursor = state.waiters_list.front_mut();
 
-    //only tasks which will be able to proceed will be awaken
+    // only tasks which will be able to proceed will be awaken
     while available_units > 0 {
         let mut waker = None;
         if let Some(node) = cursor.get() {
@@ -421,8 +424,9 @@ impl Semaphore {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{sync::Semaphore, timer::sleep, LocalExecutor};
     /// use std::{rc::Rc, time::Duration};
+    ///
+    /// use glommio::{sync::Semaphore, timer::sleep, LocalExecutor};
     ///
     /// let sem = Rc::new(Semaphore::new(1));
     ///
@@ -685,18 +689,19 @@ impl Drop for Semaphore {
 
 #[cfg(test)]
 mod test {
+    use std::{
+        cell::Cell,
+        rc::Rc,
+        time::{Duration, Instant},
+    };
+
+    use futures_lite::future::or;
+
     use super::*;
     use crate::{
         enclose,
         timer::{sleep, Timer},
         LocalExecutor,
-    };
-
-    use futures_lite::future::or;
-    use std::{
-        cell::Cell,
-        rc::Rc,
-        time::{Duration, Instant},
     };
 
     #[test]

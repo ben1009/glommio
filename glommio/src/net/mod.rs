@@ -4,9 +4,11 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 //! This module provides glommio's networking support.
-use crate::sys;
-use nix::sys::socket::{MsgFlags, SockaddrLike};
 use std::{io, os::unix::io::RawFd};
+
+use nix::sys::socket::{MsgFlags, SockaddrLike};
+
+use crate::sys;
 
 fn yolo_accept(fd: RawFd) -> Option<io::Result<RawFd>> {
     let flags =

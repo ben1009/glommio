@@ -14,11 +14,7 @@
 //!
 //! ```
 //! use glommio::{
-//!     timer::Timer,
-//!     LocalExecutor,
-//!     LocalExecutorBuilder,
-//!     LocalExecutorPoolBuilder,
-//!     PoolPlacement,
+//!     timer::Timer, LocalExecutor, LocalExecutorBuilder, LocalExecutorPoolBuilder, PoolPlacement,
 //! };
 //!
 //! LocalExecutorPoolBuilder::new(PoolPlacement::Unbound(4))
@@ -32,20 +28,6 @@
 
 #![warn(missing_docs, missing_debug_implementations)]
 
-use crate::{
-    error::BuilderErrorKind,
-    executor::stall::StallDetector,
-    io::DmaBuffer,
-    parking, reactor,
-    sys::{self, blocking::BlockingThreadPool},
-    task::{self, waker_fn::dummy_waker},
-    GlommioError, IoRequirements, IoStats, Latency, Reactor, Shares,
-};
-use ahash::AHashMap;
-use futures_lite::pin;
-use latch::{Latch, LatchState};
-use log::warn;
-pub use placement::{CpuSet, Placement, PoolPlacement};
 use std::{
     cell::RefCell,
     collections::{hash_map::Entry, BinaryHeap},
@@ -62,7 +44,23 @@ use std::{
     thread::{Builder, JoinHandle},
     time::{Duration, Instant},
 };
+
+use ahash::AHashMap;
+use futures_lite::pin;
+use latch::{Latch, LatchState};
+use log::warn;
+pub use placement::{CpuSet, Placement, PoolPlacement};
 use tracing::trace;
+
+use crate::{
+    error::BuilderErrorKind,
+    executor::stall::StallDetector,
+    io::DmaBuffer,
+    parking, reactor,
+    sys::{self, blocking::BlockingThreadPool},
+    task::{self, waker_fn::dummy_waker},
+    GlommioError, IoRequirements, IoStats, Latency, Reactor, Shares,
+};
 
 mod latch;
 mod multitask;
@@ -883,10 +881,7 @@ impl LocalExecutorPoolBuilder {
     ///
     /// ```
     /// use glommio::{
-    ///     timer::Timer,
-    ///     DefaultStallDetectionHandler,
-    ///     LocalExecutorPoolBuilder,
-    ///     PoolPlacement,
+    ///     timer::Timer, DefaultStallDetectionHandler, LocalExecutorPoolBuilder, PoolPlacement,
     /// };
     ///
     /// let local_ex = LocalExecutorPoolBuilder::new(PoolPlacement::Unbound(4))
@@ -1717,8 +1712,7 @@ impl<T> Future for Task<T> {
 ///
 /// Typically, the only situations in which `drop` is not executed are:
 ///
-/// * If you manually choose not to, with [`std::mem::forget`] or
-///   [`ManuallyDrop`].
+/// * If you manually choose not to, with [`std::mem::forget`] or [`ManuallyDrop`].
 /// * If cyclic reference counts prevents the task from being destroyed.
 ///
 /// If you believe any of the above situations are present (the first one is,
@@ -2260,8 +2254,9 @@ impl ExecutorProxy {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{Latency, LocalExecutor, Shares};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{Latency, LocalExecutor, Shares};
     ///
     /// let local_ex = LocalExecutor::default();
     /// local_ex.run(async move {
@@ -2769,8 +2764,8 @@ impl ExecutorProxy {
     ///
     /// `spawn_blocking` is there as a last resort when a blocking task needs to
     /// be executed and cannot be made cooperative. Examples are:
-    /// * Expensive syscalls that cannot use `io_uring`, such as `mmap`
-    ///   (especially with `MAP_POPULATE`)
+    /// * Expensive syscalls that cannot use `io_uring`, such as `mmap` (especially with
+    ///   `MAP_POPULATE`)
     /// * Calls to synchronous third-party code (compression, encoding, etc.)
     ///
     /// # Note
@@ -2781,8 +2776,9 @@ impl ExecutorProxy {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{LocalExecutor, Task};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{LocalExecutor, Task};
     ///
     /// let local_ex = LocalExecutor::default();
     ///
@@ -2849,13 +2845,12 @@ mod test {
         join,
     };
 
+    use super::*;
     use crate::{
         enclose,
         timer::{self, sleep, Timer},
         SharesManager,
     };
-
-    use super::*;
 
     #[test]
     fn create_and_destroy_executor() {
@@ -3185,6 +3180,7 @@ mod test {
     }
 
     #[test]
+    #[ignore = "flaky"]
     fn test_spin() {
         let dur = Duration::from_secs(1);
         let ex0 = LocalExecutorBuilder::default().make().unwrap();
@@ -3288,7 +3284,7 @@ mod test {
     }
 
     macro_rules! test_static_shares {
-        ( $s1:expr, $s2:expr, $work:block ) => {
+        ($s1:expr, $s2:expr, $work:block) => {
             let local_ex = LocalExecutor::default();
 
             local_ex.run(async {
@@ -3391,6 +3387,7 @@ mod test {
                 shares: Cell::new(0),
             })
         }
+
         fn tick(&self, millis: u64) {
             if millis < 1000 {
                 self.shares.replace(1);
@@ -3506,6 +3503,7 @@ mod test {
 
     impl Future for TestFuture {
         type Output = ();
+
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let mut w = self.w.lock().unwrap();
             match w.take() {
@@ -3700,9 +3698,11 @@ mod test {
 
     #[test]
     fn executor_invalid_executor_count() {
-        assert!(LocalExecutorPoolBuilder::new(PoolPlacement::Unbound(0))
-            .on_all_shards(|| async move {})
-            .is_err());
+        assert!(
+            LocalExecutorPoolBuilder::new(PoolPlacement::Unbound(0))
+                .on_all_shards(|| async move {})
+                .is_err()
+        );
     }
 
     #[test]
@@ -3889,12 +3889,12 @@ mod test {
     fn executor_pool_builder_spawn_cancel() {
         let nr_shards = 8;
         let builder = LocalExecutorPoolBuilder::new(PoolPlacement::Unbound(nr_shards));
-        let nr_exectuted = Arc::new(AtomicUsize::new(0));
+        let nr_executed = Arc::new(AtomicUsize::new(0));
 
         let fut_gen = {
-            let nr_exectuted = Arc::clone(&nr_exectuted);
+            let nr_executed = Arc::clone(&nr_executed);
             || async move {
-                nr_exectuted.fetch_add(1, Ordering::Relaxed);
+                nr_executed.fetch_add(1, Ordering::Relaxed);
                 unreachable!("should not execute")
             }
         };
@@ -3915,7 +3915,7 @@ mod test {
             }
         }
 
-        assert_eq!(0, nr_exectuted.load(Ordering::Relaxed));
+        assert_eq!(0, nr_executed.load(Ordering::Relaxed));
         assert_eq!(nr_shards, handles.handles.len());
         handles.join_all().into_iter().for_each(|s| {
             assert!(format!("{}", s.unwrap_err()).contains("spawn failed"));

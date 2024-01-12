@@ -181,34 +181,29 @@
 //! This crate depends heavily on Linux's `io_uring`. The reactor will register
 //! 3 rings per CPU:
 //!
-//!  * *Main ring*: The main ring, as its name implies, is where most operations
-//!    will be placed. Once the reactor is parked, it only returns if the main
-//!    ring has events to report.
+//!  * *Main ring*: The main ring, as its name implies, is where most operations will be placed.
+//!    Once the reactor is parked, it only returns if the main ring has events to report.
 //!
-//!  * *Latency ring*: Operations that are latency sensitive can be put in the
-//!    latency ring. The crate has a function called `yield_if_needed()` that
-//!    efficiently checks if there are events pending in the latency ring.
-//!    Because this crate uses `cooperative` programming, tasks run until they
-//!    either complete or decide to yield, which means they can run for a very
-//!    long time before tasks that are latency sensitive have a chance to run.
-//!    Every time you fire a long-running operation (usually a loop) it is good
-//!    practice to check [`yield_if_needed()`] periodically (for example after x
-//!    iterations of the loop). In particular, a when a new priority class is
-//!    registered, one can specify if it contains latency sensitive tasks or
-//!    not. And if the queue is marked as latency sensitive, the Latency enum
-//!    takes a duration parameter that determines for how long other tasks can
-//!    run even if there are no external events (by registering a timer with the
-//!    io_uring). If no runnable tasks in the system are latency sensitive, this
-//!    timer is not registered. Because `io_uring` allows for polling in the
-//!    ring file descriptor, it is safe to `park()` even if work is present in
-//!    the latency ring: before going to sleep, the latency ring's file
-//!    descriptor is registered with the main ring and any events it sees will
-//!    also wake up the main ring.
+//!  * *Latency ring*: Operations that are latency sensitive can be put in the latency ring. The
+//!    crate has a function called `yield_if_needed()` that efficiently checks if there are events
+//!    pending in the latency ring. Because this crate uses `cooperative` programming, tasks run
+//!    until they either complete or decide to yield, which means they can run for a very long time
+//!    before tasks that are latency sensitive have a chance to run. Every time you fire a
+//!    long-running operation (usually a loop) it is good practice to check [`yield_if_needed()`]
+//!    periodically (for example after x iterations of the loop). In particular, a when a new
+//!    priority class is registered, one can specify if it contains latency sensitive tasks or not.
+//!    And if the queue is marked as latency sensitive, the Latency enum takes a duration parameter
+//!    that determines for how long other tasks can run even if there are no external events (by
+//!    registering a timer with the io_uring). If no runnable tasks in the system are latency
+//!    sensitive, this timer is not registered. Because `io_uring` allows for polling in the ring
+//!    file descriptor, it is safe to `park()` even if work is present in the latency ring: before
+//!    going to sleep, the latency ring's file descriptor is registered with the main ring and any
+//!    events it sees will also wake up the main ring.
 //!
-//!  * *Poll ring*: Read and write operations on NVMe devices are put in the
-//!    poll ring. The poll ring does not rely on interrupts so the system has to
-//!    keep constantly polling if there is any pending work. By not relying on
-//!    interrupts we can be even more efficient with I/O in high IOPS scenarios
+//!  * *Poll ring*: Read and write operations on NVMe devices are put in the poll ring. The poll
+//!    ring does not rely on interrupts so the system has to keep constantly polling if there is any
+//!    pending work. By not relying on interrupts we can be even more efficient with I/O in high
+//!    IOPS scenarios
 //!
 //! ## Before using Glommio
 //!
@@ -240,10 +235,10 @@
 //! Connect to `example.com:80`, or time out after 10 seconds:
 //!
 //! ```
+//! use std::time::Duration;
+//!
 //! use futures_lite::{future::FutureExt, io};
 //! use glommio::{net::TcpStream, timer::Timer, LocalExecutor};
-//!
-//! use std::time::Duration;
 //!
 //! let local_ex = LocalExecutor::default();
 //! local_ex.run(async {
@@ -438,6 +433,16 @@ mod shares;
 pub mod sync;
 pub mod timer;
 
+use std::{
+    fmt::{Debug, Formatter},
+    iter::Sum,
+    time::Duration,
+};
+
+pub use enclose::enclose;
+pub use scopeguard::defer;
+use sketches_ddsketch::DDSketch;
+
 use crate::reactor::Reactor;
 pub use crate::{
     byte_slice_ext::{ByteSliceExt, ByteSliceMutExt},
@@ -455,14 +460,6 @@ pub use crate::{
     },
     shares::{Shares, SharesManager},
     sys::hardware_topology::CpuLocation,
-};
-pub use enclose::enclose;
-pub use scopeguard::defer;
-use sketches_ddsketch::DDSketch;
-use std::{
-    fmt::{Debug, Formatter},
-    iter::Sum,
-    time::Duration,
 };
 
 /// Provides common imports that almost all Glommio applications will need
@@ -735,11 +732,13 @@ impl IoStats {
 
 #[cfg(test)]
 pub(crate) mod test_utils {
-    use super::*;
-    use nix::sys::statfs::*;
     use std::path::{Path, PathBuf};
+
+    use nix::sys::statfs::*;
     use tracing::{debug, error, info, trace, warn};
     use tracing_subscriber::EnvFilter;
+
+    use super::*;
 
     #[derive(Copy, Clone)]
     pub(crate) enum TestDirectoryKind {

@@ -3,16 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 
-use crate::{
-    io::{BufferedFile, ScheduledSource},
-    reactor::Reactor,
-    sys::{IoBuffer, Source, Statx},
-};
-use futures_lite::{
-    io::{AsyncBufRead, AsyncRead, AsyncSeek, AsyncWrite, SeekFrom},
-    ready,
-};
-use pin_project_lite::pin_project;
 use std::{
     convert::TryInto,
     io,
@@ -20,6 +10,18 @@ use std::{
     pin::Pin,
     rc::{Rc, Weak},
     task::{Context, Poll, Waker},
+};
+
+use futures_lite::{
+    io::{AsyncBufRead, AsyncRead, AsyncSeek, AsyncWrite, SeekFrom},
+    ready,
+};
+use pin_project_lite::pin_project;
+
+use crate::{
+    io::{BufferedFile, ScheduledSource},
+    reactor::Reactor,
+    sys::{IoBuffer, Source, Statx},
 };
 
 type Result<T> = crate::Result<T, ()>;
@@ -485,7 +487,7 @@ impl StreamWriter {
 }
 
 macro_rules! do_seek {
-    ( $self:expr, $source:expr, $fileobj:expr, $cx:expr, $pos:expr ) => {
+    ($self:expr, $source:expr, $fileobj:expr, $cx:expr, $pos:expr) => {
         match $pos {
             SeekFrom::Start(pos) => {
                 $self.file_pos = pos;
@@ -690,13 +692,23 @@ impl AsyncBufRead for Stdin {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::test_utils::make_test_directories;
-    use futures_lite::{AsyncBufReadExt, AsyncReadExt, AsyncSeekExt, AsyncWriteExt, StreamExt};
     use std::io::ErrorKind;
 
+    use futures_lite::{AsyncBufReadExt, AsyncReadExt, AsyncSeekExt, AsyncWriteExt, StreamExt};
+
+    use super::*;
+    use crate::test_utils::make_test_directories;
+
     macro_rules! read_test {
-        ( $name:ident, $dir:ident, $kind:ident, $file:ident, $file_size:ident: $size:tt, $code:block) => {
+        (
+            $name:ident,
+            $dir:ident,
+            $kind:ident,
+            $file:ident,
+            $file_size:ident :
+            $size:tt,
+            $code:block
+        ) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(stringify!($name)) {
@@ -726,7 +738,7 @@ mod test {
     }
 
     macro_rules! write_test {
-        ( $name:ident, $dir:ident, $kind:ident, $file:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $file:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(stringify!($name)) {
@@ -743,7 +755,7 @@ mod test {
     }
 
     macro_rules! check_contents {
-        ( $buf:expr, $start:expr ) => {
+        ($buf:expr, $start:expr) => {
             for (idx, i) in $buf.iter().enumerate() {
                 assert_eq!(*i, ($start + (idx as u64)) as u8);
             }

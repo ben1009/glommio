@@ -65,17 +65,15 @@ use std::{
     time::Duration,
 };
 
+pub use completion_queue::CompletionQueue;
 #[doc(inline)]
 pub use cqe::{CQEs, CQEsBlocking, CQE};
-#[doc(inline)]
-pub use sqe::{SQEs, SQE};
-
-pub use completion_queue::CompletionQueue;
-pub use submission_queue::SubmissionQueue;
-
 pub use probe::Probe;
 #[doc(inline)]
 pub use registrar::{Personality, Registrar};
+#[doc(inline)]
+pub use sqe::{SQEs, SQE};
+pub use submission_queue::SubmissionQueue;
 
 bitflags::bitflags! {
     /// [`IoUring`] initialization flags for advanced use cases.

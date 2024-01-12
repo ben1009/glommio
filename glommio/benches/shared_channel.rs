@@ -1,6 +1,7 @@
+use std::{sync::mpsc::sync_channel, time::Instant};
+
 use glommio::{channels::shared_channel, enclose, prelude::*};
 use rand::Rng;
-use std::{sync::mpsc::sync_channel, time::Instant};
 
 fn test_spsc(capacity: usize) {
     let runs: u32 = 10_000_000;

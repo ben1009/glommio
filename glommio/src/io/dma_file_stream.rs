@@ -3,19 +3,7 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{
-    io::{dma_file::align_down, read_result::ReadResult, DmaFile},
-    sys::DmaBuffer,
-    task, ByteSliceMutExt,
-};
-use ahash::AHashMap;
 use core::task::Waker;
-use futures_lite::{
-    future::poll_fn,
-    io::{AsyncRead, AsyncWrite},
-    ready,
-    stream::{self, StreamExt},
-};
 use std::{
     cell::RefCell,
     collections::VecDeque,
@@ -27,10 +15,24 @@ use std::{
     vec::Vec,
 };
 
+use ahash::AHashMap;
+use futures_lite::{
+    future::poll_fn,
+    io::{AsyncRead, AsyncWrite},
+    ready,
+    stream::{self, StreamExt},
+};
+
+use crate::{
+    io::{dma_file::align_down, read_result::ReadResult, DmaFile},
+    sys::DmaBuffer,
+    task, ByteSliceMutExt,
+};
+
 type Result<T> = crate::Result<T, ()>;
 
 macro_rules! current_error {
-    ( $state:expr ) => {
+    ($state:expr) => {
         $state.error.take().map(|err| Err(err.into()))
     };
 }
@@ -60,11 +62,12 @@ impl DmaStreamReaderBuilder {
     /// # Examples
     ///
     /// ```no_run
+    /// use std::rc::Rc;
+    ///
     /// use glommio::{
     ///     io::{DmaFile, DmaStreamReaderBuilder},
     ///     LocalExecutor,
     /// };
-    /// use std::rc::Rc;
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async {
@@ -343,7 +346,7 @@ pub struct DmaStreamReader {
 }
 
 macro_rules! collect_error {
-    ( $state:expr, $res:expr ) => {{
+    ($state:expr, $res:expr) => {{
         if let Err(x) = $res {
             $state.error = Some(x.into());
             true
@@ -815,7 +818,7 @@ macro_rules! already_closed {
 }
 
 macro_rules! ensure_not_closed {
-    ( $file:expr ) => {
+    ($file:expr) => {
         match $file.take() {
             Some(file) => file,
             None => {
@@ -1442,15 +1445,25 @@ impl<'a> AsyncWrite for &'a DmaStreamWriter {
 
 #[cfg(test)]
 mod test {
+    use std::{io::ErrorKind, path::Path, time::Duration};
+
+    use futures::{task::noop_waker_ref, AsyncRead, AsyncReadExt, AsyncWriteExt};
+
     use super::*;
     use crate::{io::dma_file::align_up, test_utils::make_test_directories, timer::Timer};
-    use futures::{task::noop_waker_ref, AsyncRead, AsyncReadExt, AsyncWriteExt};
-    use std::{io::ErrorKind, path::Path, time::Duration};
 
     const NUM_CONCURRENT_WRITERS: usize = 10;
 
     macro_rules! file_stream_read_test {
-        ( $name:ident, $dir:ident, $kind:ident, $file:ident, $file_size:ident: $size:tt, $code:block) => {
+        (
+            $name:ident,
+            $dir:ident,
+            $kind:ident,
+            $file:ident,
+            $file_size:ident :
+            $size:tt,
+            $code:block
+        ) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(stringify!($name)) {
@@ -1483,7 +1496,7 @@ mod test {
     }
 
     macro_rules! file_stream_write_test {
-        ( $name:ident, $dir:ident, $kind:ident, $filename:ident, $file:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $filename:ident, $file:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(stringify!($name)) {
@@ -1500,7 +1513,7 @@ mod test {
     }
 
     macro_rules! multiple_file_streams_write_test {
-        ( $name:ident, $dir:ident, $kind:ident, $filenames:ident, $files:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $filenames:ident, $files:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(stringify!($name)) {
@@ -1526,7 +1539,7 @@ mod test {
     }
 
     macro_rules! check_contents {
-        ( $buf:expr, $start:expr ) => {
+        ($buf:expr, $start:expr) => {
             for (idx, i) in $buf.iter().enumerate() {
                 assert_eq!(*i, ($start + (idx as u64)) as u8);
             }
@@ -1900,8 +1913,8 @@ mod test {
         }
     }
 
-    file_stream_read_test!(read_wronly_file, path, _k, _file, _file_size: 131072, {
-        let newfile = path.join("wronly_file");
+    file_stream_read_test!(read_wrongly_file, path, _k, _file, _file_size: 131072, {
+        let newfile = path.join("wrongly_file");
         let rfile = DmaFile::create(&newfile).await.unwrap();
         let mut reader = DmaStreamReaderBuilder::new(rfile)
             .with_buffer_size(1024)

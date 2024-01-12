@@ -1,5 +1,6 @@
-use glommio::channels::spsc_queue;
 use std::time::Instant;
+
+use glommio::channels::spsc_queue;
 
 fn test_spsc(capacity: usize) {
     const RUNS: u32 = 10 * 1000 * 1000;

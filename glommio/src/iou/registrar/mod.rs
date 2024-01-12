@@ -14,10 +14,10 @@ mod registered;
 
 use std::{fmt, io, marker::PhantomData, os::unix::io::RawFd, ptr::NonNull};
 
+pub use registered::*;
+
 use super::{resultify, IoUring, Probe};
 use crate::uring_sys;
-
-pub use registered::*;
 
 /// A `Registrar` creates ahead-of-time kernel references to files and user
 /// buffers.
@@ -109,8 +109,8 @@ impl<'ring> Registrar<'ring> {
     /// Returns an error if
     /// * there is a preexisting set of registered files,
     /// * the `files` slice was empty,
-    /// * the inner [`io_uring_register_files`](uring_sys::
-    ///   io_uring_register_files) call failed for another reason
+    /// * the inner [`io_uring_register_files`](uring_sys:: io_uring_register_files) call failed for
+    ///   another reason
     pub fn register_files<'a>(
         &self,
         files: &'a [RawFd],
@@ -141,8 +141,8 @@ impl<'ring> Registrar<'ring> {
     /// * the `files` slice was empty,
     /// * `offset` is out of bounds,
     /// * the `files` slice was too large,
-    /// * the inner [`io_uring_register_files_update`](uring_sys::
-    ///   io_uring_register_files_update) call failed for another reason
+    /// * the inner [`io_uring_register_files_update`](uring_sys:: io_uring_register_files_update)
+    ///   call failed for another reason
     pub fn update_registered_files<'a>(
         &mut self,
         offset: usize,
@@ -230,8 +230,9 @@ impl From<u16> for Personality {
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use std::os::unix::io::AsRawFd;
+
+    use super::*;
 
     #[test]
     #[should_panic(expected = "Invalid argument")]

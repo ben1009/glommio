@@ -25,7 +25,10 @@ use std::{
 
 use ahash::AHashMap;
 use log::error;
-use nix::sys::socket::{MsgFlags, SockaddrLike, SockaddrStorage};
+use nix::{
+    poll::PollFlags,
+    sys::socket::{MsgFlags, SockaddrLike, SockaddrStorage},
+};
 use smallvec::SmallVec;
 
 use crate::{
@@ -38,7 +41,6 @@ use crate::{
     },
     IoRequirements, IoStats, TaskQueueHandle,
 };
-use nix::poll::PollFlags;
 
 type SharedChannelWakerChecker = (SmallVec<[Waker; 1]>, Option<Box<dyn Fn() -> usize>>);
 

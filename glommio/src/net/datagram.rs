@@ -3,17 +3,19 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{
-    sys::{DmaBuffer, Source, SourceType},
-    ByteSliceMutExt, Reactor,
-};
-use nix::sys::socket::{MsgFlags, SockaddrLike};
 use std::{
     cell::Cell,
     io,
     os::unix::io::{AsRawFd, FromRawFd, RawFd},
     rc::{Rc, Weak},
     time::Duration,
+};
+
+use nix::sys::socket::{MsgFlags, SockaddrLike};
+
+use crate::{
+    sys::{DmaBuffer, Source, SourceType},
+    ByteSliceMutExt, Reactor,
 };
 
 const DEFAULT_BUFFER_SIZE: usize = 8192;

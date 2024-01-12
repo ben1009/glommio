@@ -1,6 +1,7 @@
+use std::time::Instant;
+
 use futures_lite::stream::StreamExt;
 use glommio::{channels::local_channel, prelude::*};
-use std::time::Instant;
 
 fn main() {
     let local_ex = LocalExecutorBuilder::new(Placement::Fixed(0))

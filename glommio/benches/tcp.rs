@@ -1,3 +1,10 @@
+use std::{
+    cell::Cell,
+    rc::Rc,
+    sync::{Arc, Mutex},
+    time::Instant,
+};
+
 use futures_lite::{
     io::{AsyncReadExt, AsyncWriteExt},
     stream::StreamExt,
@@ -6,12 +13,6 @@ use glommio::{
     enclose,
     net::{TcpListener, TcpStream},
     LocalExecutorBuilder, Placement,
-};
-use std::{
-    cell::Cell,
-    rc::Rc,
-    sync::{Arc, Mutex},
-    time::Instant,
 };
 
 fn main() {

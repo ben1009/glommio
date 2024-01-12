@@ -4,13 +4,6 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 use alloc::alloc::Layout;
-use log::warn;
-use nix::{
-    fcntl::{FallocateFlags, OFlag},
-    poll::PollFlags,
-    sys::socket::{SockaddrLike, SockaddrStorage},
-};
-use rlimit::Resource;
 use std::{
     cell::{Cell, Ref, RefCell, RefMut},
     collections::VecDeque,
@@ -29,6 +22,20 @@ use std::{
     time::{Duration, Instant},
 };
 
+use ahash::AHashMap;
+use buddy_alloc::buddy_alloc::{BuddyAlloc, BuddyAllocParam};
+use log::warn;
+use nix::{
+    fcntl::{FallocateFlags, OFlag},
+    poll::PollFlags,
+    sys::{
+        socket::{MsgFlags, SockFlag, SockaddrLike, SockaddrStorage},
+        stat::Mode as OpenMode,
+    },
+};
+use rlimit::Resource;
+use smallvec::SmallVec;
+
 use crate::{
     free_list::{FreeList, Idx},
     iou,
@@ -43,13 +50,6 @@ use crate::{
     uring_sys::{self, IoRingOp},
     GlommioError, IoRequirements, IoStats, ReactorErrorKind, RingIoStats, TaskQueueHandle,
 };
-use ahash::AHashMap;
-use buddy_alloc::buddy_alloc::{BuddyAlloc, BuddyAllocParam};
-use nix::sys::{
-    socket::{MsgFlags, SockFlag},
-    stat::Mode as OpenMode,
-};
-use smallvec::SmallVec;
 
 const MSG_ZEROCOPY: i32 = 0x4000000;
 
@@ -1678,7 +1678,7 @@ impl Reactor {
             &mut *self.ring_for_source(source),
             source,
             UringOpDescriptor::Nop,
-            &mut *self.source_map.borrow_mut(),
+            &mut self.source_map.borrow_mut(),
         );
     }
 
@@ -1757,16 +1757,14 @@ impl Reactor {
     /// roles we keep them separate instead of overloading the same
     /// parameter.
     ///
-    /// * The first is the preempt timer. It is designed to take the current
-    ///   task queue out of the cpu. If nothing else fires in the latency ring
-    ///   the preempt timer will, making need_preempt return true. Currently, we
-    ///   always install a preempt timer in the upper layers but from the point
-    ///   of view of the io_uring implementation it is optional: it is perfectly
-    ///   valid not to have one. Preempt timers are installed by Glommio
-    ///   executor runtime.
+    /// * The first is the preempt timer. It is designed to take the current task queue out of the
+    ///   cpu. If nothing else fires in the latency ring the preempt timer will, making need_preempt
+    ///   return true. Currently, we always install a preempt timer in the upper layers but from the
+    ///   point of view of the io_uring implementation it is optional: it is perfectly valid not to
+    ///   have one. Preempt timers are installed by Glommio executor runtime.
     ///
-    /// * The second is the user timer. It is installed per a user request when
-    ///   the user creates a `Timer` (or `TimerAction`).
+    /// * The second is the user timer. It is installed per a user request when the user creates a
+    ///   `Timer` (or `TimerAction`).
     ///
     /// At some level, those are both just timers and can be coalesced. And they
     /// certainly are: if there is a user timer that needs to fire in 1ms, and
@@ -1780,20 +1778,17 @@ impl Reactor {
     /// However, they are also different. The main source of difference is sleep
     /// and wake behavior:
     ///
-    /// * When there is no more work to do, and we go to sleep, we do not want
-    ///   to register the preempt timer: it is designed to fire periodically to
-    ///   take us out of the CPU and if there is no task queue running, we don't
-    ///   want to wake up and spend power just for that. However, if there is a
-    ///   user timer that needs to fire in the future we must register it.
-    ///   Otherwise, we will sleep and never wake up.
+    /// * When there is no more work to do, and we go to sleep, we do not want to register the
+    ///   preempt timer: it is designed to fire periodically to take us out of the CPU and if there
+    ///   is no task queue running, we don't want to wake up and spend power just for that. However,
+    ///   if there is a user timer that needs to fire in the future we must register it. Otherwise,
+    ///   we will sleep and never wake up.
     ///
-    /// * The user timer point of expiration never changes. So once we register
-    ///   it we don't need to rearm it until it fires. But the preempt timer has
-    ///   to be rearmed every time. Moreover, it needs to give every task queue
-    ///   a fair shot at running. So it needs to be rearmed as close as possible
-    ///   to the point where we *leave* this method. For instance: if we spin
-    ///   here for 3ms and the preempt timer is 10ms that would leave the next
-    ///   task queue just 7ms to run.
+    /// * The user timer point of expiration never changes. So once we register it we don't need to
+    ///   rearm it until it fires. But the preempt timer has to be rearmed every time. Moreover, it
+    ///   needs to give every task queue a fair shot at running. So it needs to be rearmed as close
+    ///   as possible to the point where we *leave* this method. For instance: if we spin here for
+    ///   3ms and the preempt timer is 10ms that would leave the next task queue just 7ms to run.
     pub(crate) fn wait<Preempt, F>(
         &self,
         preempt_timer: Preempt,
@@ -1928,8 +1923,7 @@ impl Reactor {
 
     pub(crate) fn ring_for_source(&self, source: &Source) -> RefMut<'_, dyn UringCommon> {
         // Dispatch requests according to the following rules:
-        // * Disk reads/writes go to the poll ring if possible, or the main ring
-        //   otherwise;
+        // * Disk reads/writes go to the poll ring if possible, or the main ring otherwise;
         // * Network Rx and connect/accept go the latency ring;
         // * Every other request are dispatched to the main ring;
         // We avoid putting requests that come in high numbers on the latency ring
@@ -2030,10 +2024,10 @@ impl Drop for Reactor {
 
 #[cfg(test)]
 mod tests {
-    use crate::PoolPlacement;
     use std::time::Instant;
 
     use super::*;
+    use crate::PoolPlacement;
 
     #[test]
     fn timeout_smoke_test() {

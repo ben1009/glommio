@@ -1,4 +1,3 @@
-use enclose::enclose;
 use std::{
     io,
     sync::{
@@ -7,6 +6,8 @@ use std::{
     },
     time::{Duration, Instant},
 };
+
+use enclose::enclose;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},

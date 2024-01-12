@@ -3,13 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::io::{
-    bulk_io::{MergedBufferLimit, ReadAmplificationLimit, ReadManyArgs},
-    open_options::OpenOptions,
-    DmaStreamReaderBuilder, DmaStreamWriter, DmaStreamWriterBuilder, IoVec, ReadManyResult,
-    ReadResult, ScheduledSource,
-};
-use futures_lite::{future::poll_fn, io::AsyncWrite, Stream};
 use std::{
     cell::Ref,
     io,
@@ -17,6 +10,15 @@ use std::{
     pin::Pin,
     rc::Rc,
     task::{Context, Poll},
+};
+
+use futures_lite::{future::poll_fn, io::AsyncWrite, Stream};
+
+use crate::io::{
+    bulk_io::{MergedBufferLimit, ReadAmplificationLimit, ReadManyArgs},
+    open_options::OpenOptions,
+    DmaStreamReaderBuilder, DmaStreamWriter, DmaStreamWriterBuilder, IoVec, ReadManyResult,
+    ReadResult, ScheduledSource,
 };
 type Result<T> = crate::Result<T, ()>;
 
@@ -26,10 +28,9 @@ type Result<T> = crate::Result<T, ()>;
 ///
 /// Working with an [`ImmutableFile`] happens in two steps:
 ///
-/// * First, all the writes are done, through the [`ImmutableFilePreSealSink`],
-///   which has no read methods.
-/// * Then, after the sink is [`seal`]ed, it is no longer possible to write to
-///   it
+/// * First, all the writes are done, through the [`ImmutableFilePreSealSink`], which has no read
+///   methods.
+/// * Then, after the sink is [`seal`]ed, it is no longer possible to write to it
 ///
 /// [`DmaFile`]: struct.DmaFile.html
 /// [`ImmutableFilePreSealSink`]: ImmutableFilePreSealSink
@@ -361,8 +362,7 @@ impl ImmutableFile {
     /// symlink is *not* considered to be the same file.
     ///
     /// Files will be considered to be the same if:
-    /// * A file is opened multiple times (different file descriptors, but same
-    ///   file!)
+    /// * A file is opened multiple times (different file descriptors, but same file!)
     /// * they are hard links.
     pub fn is_same(&self, other: &ImmutableFile) -> bool {
         self.stream_builder.file.is_same(&other.stream_builder.file)
@@ -444,13 +444,14 @@ impl ImmutableFile {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::{enclose, io::DmaFile, test_utils::make_test_directories};
     use futures::{AsyncReadExt, AsyncWriteExt};
     use futures_lite::stream::{self, StreamExt};
 
+    use super::*;
+    use crate::{enclose, io::DmaFile, test_utils::make_test_directories};
+
     macro_rules! immutable_file_test {
-        ( $name:ident, $dir:ident, $code:block) => {
+        ($name:ident, $dir:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(&format!("immutable-dma-{}", stringify!($name))) {
@@ -460,7 +461,7 @@ mod test {
             }
         };
 
-        ( panic: $name:ident, $dir:ident, $code:block) => {
+        (panic: $name:ident, $dir:ident, $code:block) => {
             #[test]
             #[should_panic]
             fn $name() {
