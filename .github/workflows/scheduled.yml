@@ -31,7 +31,9 @@ jobs:
         - name: Install nextest
           uses: taiki-e/install-action@nextest
         - name: cargo nextest --locked
-          run: cargo nextest run --locked 
+          run: |
+            rustup default nightly
+            cargo nextest run --locked 
           #--all-features --all-targets
     # https://twitter.com/alcuadrado/status/1571291687837732873
     update:
@@ -62,7 +64,9 @@ jobs:
           uses: taiki-e/install-action@nextest
         - name: cargo nextest
           if: hashFiles('Cargo.lock') != ''
-          run: cargo nextest run --locked 
+          run: |
+            rustup default beta 
+            cargo nextest run --locked 
             #--all-features --all-targets
           env:
             RUSTFLAGS: -D deprecated
