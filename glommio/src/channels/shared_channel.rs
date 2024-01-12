@@ -4,14 +4,6 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 //
-use crate::{
-    channels::spsc_queue::{make, BufferHalf, Consumer, Producer},
-    enclose,
-    reactor::Reactor,
-    sys::{self, SleepNotifier},
-    GlommioError, ResourceType,
-};
-use futures_lite::{future, stream::Stream};
 use std::{
     fmt,
     future::Future,
@@ -19,6 +11,16 @@ use std::{
     rc::{Rc, Weak},
     sync::Arc,
     task::{Context, Poll},
+};
+
+use futures_lite::{future, stream::Stream};
+
+use crate::{
+    channels::spsc_queue::{make, BufferHalf, Consumer, Producer},
+    enclose,
+    reactor::Reactor,
+    sys::{self, SleepNotifier},
+    GlommioError, ResourceType,
 };
 
 type Result<T, V> = crate::Result<T, V>;
@@ -127,6 +129,7 @@ impl<T: BufferHalf + Clone> Connector<T> {
 
 impl<T: BufferHalf + Clone> Future for Connector<T> {
     type Output = Arc<SleepNotifier>;
+
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let reactor = self.reactor.upgrade().unwrap();
 
@@ -487,18 +490,20 @@ impl<T: Send + Sized> Drop for ConnectedSender<T> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::{
-        timer::{sleep, Timer},
-        LocalExecutorBuilder, Placement,
-    };
-    use futures_lite::{FutureExt, StreamExt};
     use std::{
         sync::{
             atomic::{AtomicUsize, Ordering},
             Arc,
         },
         time::Duration,
+    };
+
+    use futures_lite::{FutureExt, StreamExt};
+
+    use super::*;
+    use crate::{
+        timer::{sleep, Timer},
+        LocalExecutorBuilder, Placement,
     };
 
     #[test]

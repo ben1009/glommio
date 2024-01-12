@@ -164,16 +164,16 @@ pub struct io_uring_cq {
 
 #[repr(C)]
 pub struct io_uring_sqe {
-    pub opcode: libc::__u8,  /* type of operation for this sqe */
-    pub flags: libc::__u8,   /* IOSQE_ flags */
-    pub ioprio: libc::__u16, /* ioprio for the request */
-    pub fd: libc::__s32,     /* file descriptor to do IO on */
+    pub opcode: libc::__u8,  // type of operation for this sqe
+    pub flags: libc::__u8,   // IOSQE_ flags
+    pub ioprio: libc::__u16, // ioprio for the request
+    pub fd: libc::__s32,     // file descriptor to do IO on
     pub off_addr2: off_addr2,
-    pub addr: libc::__u64, /* pointer to buffer or iovecs */
-    pub len: libc::__u32,  /* buffer size or number of iovecs */
+    pub addr: libc::__u64, // pointer to buffer or iovecs
+    pub len: libc::__u32,  // buffer size or number of iovecs
     pub cmd_flags: cmd_flags,
-    pub user_data: libc::__u64, /* data to be passed back at completion time */
-    pub buf_index: buf_index_padding, /* index into fixed buffers, if used */
+    pub user_data: libc::__u64, // data to be passed back at completion time
+    pub buf_index: buf_index_padding, // index into fixed buffers, if used
 }
 
 #[repr(C)]
@@ -217,8 +217,8 @@ pub struct buf_index {
 
 #[repr(C)]
 pub struct io_uring_cqe {
-    pub user_data: libc::__u64, /* sqe->data submission passed back */
-    pub res: libc::__s32,       /* result code for this event */
+    pub user_data: libc::__u64, // sqe->data submission passed back
+    pub res: libc::__s32,       // result code for this event
     pub flags: libc::__u32,
 }
 

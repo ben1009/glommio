@@ -1,5 +1,6 @@
-use glommio::{channels::shared_channel, net::UdpSocket, prelude::*};
 use std::time::Instant;
+
+use glommio::{channels::shared_channel, net::UdpSocket, prelude::*};
 
 fn main() {
     let runs: u32 = 100_000;

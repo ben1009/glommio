@@ -25,18 +25,16 @@
 //! their performance story.
 //!
 //! Disadvantages of Buffered I/O:
-//!  * Hard to know when resources are really used, which make controlled
-//!    processes almost impossible (the time of write to device is detached from
-//!    the file write time)
-//!  * More copies than necessary, as the data has to be copied from the device
-//!    to the page cache, from the page cache to the internal file buffers, and
-//!    in abstract linear implementations like [`AsyncWriteExt`] and
-//!    [`AsyncReadExt`] from user-provided buffers to the file internal buffers.
-//!  * Advanced features for io_uring like Non-interrupt mode, registered files,
-//!    registered buffers, will not work with Buffered I/O
-//!  * Read amplification for small random reads, as the OS is bounded by the
-//!    page size (usually 4 KiB), even though modern NVMe devices are perfectly
-//!    capable of issuing 512-byte I/O.
+//!  * Hard to know when resources are really used, which make controlled processes almost
+//!    impossible (the time of write to device is detached from the file write time)
+//!  * More copies than necessary, as the data has to be copied from the device to the page cache,
+//!    from the page cache to the internal file buffers, and in abstract linear implementations like
+//!    [`AsyncWriteExt`] and [`AsyncReadExt`] from user-provided buffers to the file internal
+//!    buffers.
+//!  * Advanced features for io_uring like Non-interrupt mode, registered files, registered buffers,
+//!    will not work with Buffered I/O
+//!  * Read amplification for small random reads, as the OS is bounded by the page size (usually 4
+//!    KiB), even though modern NVMe devices are perfectly capable of issuing 512-byte I/O.
 //!
 //! The main structure to deal with Buffered I/O is the [`BufferedFile`] struct.
 //! It is targeted at random I/O. Reads from and writes to it expect a position.
@@ -56,10 +54,9 @@
 //! applications can or want to deal with that complexity.
 //!
 //! Disadvantages of Direct I/O:
-//! * I/O needs to be aligned. Both the buffers and the file positions need
-//!   specific alignments. The [`DmaBuffer`] should hide most of that
-//!   complexity, but you may still end up with heavy read amplification if you
-//!   are not careful.
+//! * I/O needs to be aligned. Both the buffers and the file positions need specific alignments. The
+//!   [`DmaBuffer`] should hide most of that complexity, but you may still end up with heavy read
+//!   amplification if you are not careful.
 //! * Without a user-provided cache, random performance can be bad.
 //!
 //! At the lowest level, there are two main structs that deal with File Direct
@@ -116,9 +113,7 @@ macro_rules! enhanced_try {
             }
         }
     }};
-    ($expr:expr, $op:expr, $obj:expr) => {{
-        enhanced_try!($expr, $op, $obj.path(), Some($obj.as_raw_fd()))
-    }};
+    ($expr:expr, $op:expr, $obj:expr) => {{ enhanced_try!($expr, $op, $obj.path(), Some($obj.as_raw_fd())) }};
 }
 
 mod buffered_file;

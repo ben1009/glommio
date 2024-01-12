@@ -3,13 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 
-use crate::{
-    channels::local_channel::{self, LocalReceiver, LocalSender},
-    controllers::ControllerStatus,
-    enclose, task, Latency, Shares, SharesManager, TaskQueueHandle,
-};
-use futures_lite::StreamExt;
-use log::{trace, warn};
 use std::{
     cell::{Cell, RefCell},
     collections::VecDeque,
@@ -19,6 +12,15 @@ use std::{
     pin::Pin,
     rc::Rc,
     time::{Duration, Instant},
+};
+
+use futures_lite::StreamExt;
+use log::{trace, warn};
+
+use crate::{
+    channels::local_channel::{self, LocalReceiver, LocalSender},
+    controllers::ControllerStatus,
+    enclose, task, Latency, Shares, SharesManager, TaskQueueHandle,
 };
 
 /// Items going into the [`DeadlineQueue`] must implement this trait.
@@ -54,8 +56,7 @@ pub trait DeadlineSource {
     /// The total amount of units to be processed.
     ///
     /// This could be anything you want:
-    /// * If you are flushing a file, this could indicate the size in bytes of
-    ///   the buffer
+    /// * If you are flushing a file, this could indicate the size in bytes of the buffer
     /// * If you are scanning an array, this could be the number of elements.
     ///
     /// As long as this quantity is consistent with [`processed_units`] the
@@ -164,11 +165,10 @@ impl<T> SharesManager for InnerQueue<T> {
     ///
     ///  There are a couple of practical problems with that.
     ///
-    ///  * The first is that the output of the controller would be zero if we
-    ///    there are no error
-    ///  * The second is that our integral term would accumulate errors that may
-    ///    not be comparable as we accumulate artifacts of the delta_t
-    ///    calculation (as we'll never in practice keep delta_t constant)
+    ///  * The first is that the output of the controller would be zero if we there are no error
+    ///  * The second is that our integral term would accumulate errors that may not be comparable
+    ///    as we accumulate artifacts of the delta_t calculation (as we'll never in practice keep
+    ///    delta_t constant)
     ///
     ///  The way we'll solve this is by expressing an alternate error E(T) which
     /// is  essentially the integral of e(t) in time:
@@ -227,15 +227,12 @@ impl<T> SharesManager for InnerQueue<T> {
         self.last_error.set(error);
 
         // How did we pick our constants:
-        //  * As with any stable PI controller we want the bulk of our gain to come from
-        //    P.
-        //  * As we normalize the maximum error to 1 we know that the gain should be at
-        //    most 1000
-        //  * physically, Ki can be expressed as Kp / Tau where Tau is a time constant,
-        //    roughly equivalent to how many periods need to pass for the integral term
-        //    to generate the same gain as the proportional term. We set that to 6 so
-        //    the controller is not too sluggish, which is around 1.5 seconds on the
-        //    default 250ms adjustment period.
+        //  * As with any stable PI controller we want the bulk of our gain to come from P.
+        //  * As we normalize the maximum error to 1 we know that the gain should be at most 1000
+        //  * physically, Ki can be expressed as Kp / Tau where Tau is a time constant, roughly
+        //    equivalent to how many periods need to pass for the integral term to generate the same
+        //    gain as the proportional term. We set that to 6 so the controller is not too sluggish,
+        //    which is around 1.5 seconds on the default 250ms adjustment period.
         //
         //  We can then write X + X/6 = 1000, and solving for X we have the constants
         // below
@@ -326,27 +323,23 @@ impl<T> InnerQueue<T> {
 /// Controlling processes is tricky, and you should keep some things in mind for
 /// best results:
 ///
-/// * Control loops have a set time. It takes a while for the system to
-///   stabilize so this is better suited for long processes (Deadline is much
-///   higher than the adjustment period)
-/// * Control loops add overhead, so setting the adjustment period too low may
-///   not be the best way to make sure that the deadline is much higher than the
-///   adjustment period =)
-/// * Control loops have *dead time*. In control theory, dead time is the time
-///   that passes between the application of the control decision and its
-///   effects being seen. In our case, the scheduler may not schedule us for a
-///   long time, especially if the shares are low.
-/// * Control loops work better the faster and smoother the response is. Let's
-///   use an example flushing a file: you may be moving data to the file
-///   internal buffers, but they are not *flushed* to the media. When the data
-///   is finally flushed a giant bubble is inserted into the control loop. The
-///   characteristics of the system will radically change. Contract that for
-///   instance with O_DIRECT files, where writing to the file means writing to
-///   the media: smooth and fast feedback!
+/// * Control loops have a set time. It takes a while for the system to stabilize so this is better
+///   suited for long processes (Deadline is much higher than the adjustment period)
+/// * Control loops add overhead, so setting the adjustment period too low may not be the best way
+///   to make sure that the deadline is much higher than the adjustment period =)
+/// * Control loops have *dead time*. In control theory, dead time is the time that passes between
+///   the application of the control decision and its effects being seen. In our case, the scheduler
+///   may not schedule us for a long time, especially if the shares are low.
+/// * Control loops work better the faster and smoother the response is. Let's use an example
+///   flushing a file: you may be moving data to the file internal buffers, but they are not
+///   *flushed* to the media. When the data is finally flushed a giant bubble is inserted into the
+///   control loop. The characteristics of the system will radically change. Contract that for
+///   instance with O_DIRECT files, where writing to the file means writing to the media: smooth and
+///   fast feedback!
 ///
 ///   The moral of the story is:
-///    * do not use this with buffered files or other buffered sinks where the
-///      real physical response is delayed
+///    * do not use this with buffered files or other buffered sinks where the real physical
+///      response is delayed
 ///    * do not set the adjustment period too low
 ///    * do not use this very short-lived processes.
 ///
@@ -375,8 +368,9 @@ impl<T: 'static> DeadlineQueue<T> {
     ///
     /// # Examples
     /// ```
-    /// use glommio::{controllers::DeadlineQueue, LocalExecutor};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{controllers::DeadlineQueue, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     ///
@@ -456,12 +450,13 @@ impl<T: 'static> DeadlineQueue<T> {
     /// # Examples:
     ///
     /// ```
+    /// use std::{io, pin::Pin, rc::Rc, time::Duration};
+    ///
     /// use futures_lite::{future::ready, Future};
     /// use glommio::{
     ///     controllers::{DeadlineQueue, DeadlineSource},
     ///     LocalExecutor,
     /// };
-    /// use std::{io, pin::Pin, rc::Rc, time::Duration};
     ///
     /// struct Example {}
     ///
@@ -567,6 +562,7 @@ mod test {
                 drop_guarantee: Rc::new(Cell::new(false)),
             })
         }
+
         async fn wait(self: Rc<Self>) -> usize {
             Timer::new(self.duration).await;
             0

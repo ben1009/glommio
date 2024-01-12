@@ -4,10 +4,6 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 
-use crate::{
-    io::{glommio_file::GlommioFile, read_result::ReadResult, OpenOptions},
-    GlommioError,
-};
 use std::{
     cell::Ref,
     os::unix::io::{AsRawFd, FromRawFd, RawFd},
@@ -15,6 +11,10 @@ use std::{
 };
 
 use super::Stat;
+use crate::{
+    io::{glommio_file::GlommioFile, read_result::ReadResult, OpenOptions},
+    GlommioError,
+};
 
 type Result<T> = crate::Result<T, ()>;
 
@@ -53,15 +53,15 @@ impl BufferedFile {
     /// symlink is *not* considered to be the same file.
     ///
     /// Files will be considered to be the same if:
-    /// * A file is opened multiple times (different file descriptors, but same
-    ///   file!)
+    /// * A file is opened multiple times (different file descriptors, but same file!)
     /// * they are hard links.
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// use glommio::{io::BufferedFile, LocalExecutor};
     /// use std::os::unix::io::AsRawFd;
+    ///
+    /// use glommio::{io::BufferedFile, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async {
@@ -282,7 +282,7 @@ mod test {
     use crate::test_utils::make_test_directories;
 
     macro_rules! buffered_file_test {
-        ( $name:ident, $dir:ident, $kind:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(&format!("buffered-{}", stringify!($name))) {
@@ -295,7 +295,7 @@ mod test {
     }
 
     macro_rules! check_contents {
-        ( $buf:expr, $start:expr ) => {
+        ($buf:expr, $start:expr) => {
             for (idx, i) in $buf.iter().enumerate() {
                 assert_eq!(*i, ($start + (idx as u64)) as u8);
             }

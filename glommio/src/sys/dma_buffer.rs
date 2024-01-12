@@ -8,10 +8,10 @@
 // but in the near future they can be coming from memory-areas
 // that are pre-registered for I/O uring.
 
+use alloc::alloc::Layout;
 use std::ptr;
 
 use crate::sys::uring::UringBuffer;
-use alloc::alloc::Layout;
 
 #[derive(Debug)]
 pub(crate) struct SysAlloc {

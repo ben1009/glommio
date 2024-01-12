@@ -3,19 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use super::{datagram::GlommioDatagram, stream::GlommioStream};
-use crate::{
-    net::stream::{Buffered, NonBuffered, Preallocated, RxBuf},
-    reactor::Reactor,
-};
-use futures_lite::{
-    future::poll_fn,
-    io::{AsyncBufRead, AsyncRead, AsyncWrite},
-    stream::{self, Stream},
-};
-use nix::sys::socket::UnixAddr;
-use pin_project_lite::pin_project;
-use socket2::{Domain, Socket, Type};
 use std::{
     io,
     net::Shutdown,
@@ -27,6 +14,21 @@ use std::{
     pin::Pin,
     rc::{Rc, Weak},
     task::{Context, Poll},
+};
+
+use futures_lite::{
+    future::poll_fn,
+    io::{AsyncBufRead, AsyncRead, AsyncWrite},
+    stream::{self, Stream},
+};
+use nix::sys::socket::UnixAddr;
+use pin_project_lite::pin_project;
+use socket2::{Domain, Socket, Type};
+
+use super::{datagram::GlommioDatagram, stream::GlommioStream};
+use crate::{
+    net::stream::{Buffered, NonBuffered, Preallocated, RxBuf},
+    reactor::Reactor,
 };
 
 type Result<T> = crate::Result<T, ()>;
@@ -49,12 +51,10 @@ type Result<T> = crate::Result<T, ()>;
 /// There are so far only one approach to load balancing possible with the
 /// `UnixListener`:
 ///
-/// * It is possible to use [`shared_accept`] instead of [`accept`]: that
-///   returns an object that implements [`Send`]. You can then use a
-///   [`shared_channel`] to send the accepted connection into multiple
-///   executors. The object returned by [`shared_accept`] can then be bound to
-///   its executor with [`bind_to_executor`], at which point it becomes a
-///   standard [`UnixStream`].
+/// * It is possible to use [`shared_accept`] instead of [`accept`]: that returns an object that
+///   implements [`Send`]. You can then use a [`shared_channel`] to send the accepted connection
+///   into multiple executors. The object returned by [`shared_accept`] can then be bound to its
+///   executor with [`bind_to_executor`], at which point it becomes a standard [`UnixStream`].
 ///
 ///
 /// The socket will be closed when the value is dropped.
@@ -233,10 +233,7 @@ impl AcceptedUnixStream {
     /// # Examples
     /// ```no_run
     /// use glommio::{
-    ///     channels::shared_channel,
-    ///     net::UnixListener,
-    ///     LocalExecutor,
-    ///     LocalExecutorBuilder,
+    ///     channels::shared_channel, net::UnixListener, LocalExecutor, LocalExecutorBuilder,
     /// };
     ///
     /// let ex = LocalExecutor::default();
@@ -716,13 +713,15 @@ impl UnixDatagram {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{enclose, test_utils::*};
-    use futures_lite::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
     use std::cell::Cell;
 
+    use futures_lite::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt};
+
+    use super::*;
+    use crate::{enclose, test_utils::*};
+
     macro_rules! unix_socket_test {
-        ( $name:ident, $dir:ident, $code:block) => {
+        ($name:ident, $dir:ident, $code:block) => {
             #[test]
             fn $name() {
                 let td = make_tmp_test_directory(&format!("uds-{}", stringify!($name)));

@@ -3,20 +3,22 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{channels::ChannelCapacity, GlommioError, ResourceType};
-use futures_lite::{stream::Stream, Future};
 use std::{
     cell::RefCell,
+    collections::VecDeque,
+    marker::PhantomPinned,
     pin::Pin,
+    ptr::NonNull,
     rc::Rc,
     task::{Context, Poll, Waker},
 };
 
+use futures_lite::{stream::Stream, Future};
 use intrusive_collections::{
     container_of, linked_list::LinkOps, offset_of, Adapter, LinkedList, LinkedListLink, PointerOps,
 };
 
-use std::{collections::VecDeque, marker::PhantomPinned, ptr::NonNull};
+use crate::{channels::ChannelCapacity, GlommioError, ResourceType};
 
 #[derive(Debug)]
 /// Send endpoint to the `local_channel`
@@ -145,7 +147,7 @@ fn register_into_waiting_queue<T>(node: Pin<&mut WaiterNode>, state: &mut State<
                 .send_waiters
                 .as_mut()
                 .expect("There should be active sender instance for the channel")
-                //it is safe to use unchecked call here because we convert from reference
+                // it is safe to use unchecked call here because we convert from reference
                 .push_back(unsafe { NonNull::new_unchecked(node.get_unchecked_mut()) });
         }
         WaiterKind::Receiver => {
@@ -153,7 +155,7 @@ fn register_into_waiting_queue<T>(node: Pin<&mut WaiterNode>, state: &mut State<
                 .recv_waiters
                 .as_mut()
                 .expect("There should be active receiver instance for the channel")
-                //it is safe to use unchecked call here because we convert from reference
+                // it is safe to use unchecked call here because we convert from reference
                 .push_back(unsafe { NonNull::new_unchecked(node.get_unchecked_mut()) });
         }
     }
@@ -190,7 +192,7 @@ fn remove_from_the_waiting_queue<T>(node: Pin<&mut WaiterNode>, state: &mut Stat
 impl<'a, T, F> Drop for Waiter<'a, T, F> {
     fn drop(&mut self) {
         if self.node.link.is_linked() {
-            //if future is linked into the waiting queue then it is already pinned
+            // if future is linked into the waiting queue then it is already pinned
             let pinned_node = unsafe { Pin::new_unchecked(&mut self.node) };
             let kind = pinned_node
                 .kind
@@ -230,8 +232,8 @@ struct WaiterNode {
 struct WaiterPointerOps;
 
 unsafe impl PointerOps for WaiterPointerOps {
-    type Value = WaiterNode;
     type Pointer = NonNull<WaiterNode>;
+    type Value = WaiterNode;
 
     unsafe fn from_raw(&self, value: *const Self::Value) -> Self::Pointer {
         NonNull::new(value as *mut Self::Value).expect("Pointer to the value can not be null")
@@ -624,10 +626,10 @@ impl<T> Drop for LocalReceiver<T> {
 
 struct ChannelStream<'a, T> {
     channel: &'a LocalChannel<T>,
-    //if do not use Box stream becomes !Unpin which will force users to pin it
-    //while using StreamExt which is not user friendly. Creation of stream is relatively
-    //rare operation and happens once during the routine so we can afford to perform
-    //memory allocation here
+    // if do not use Box stream becomes !Unpin which will force users to pin it
+    // while using StreamExt which is not user friendly. Creation of stream is relatively
+    // rare operation and happens once during the routine so we can afford to perform
+    // memory allocation here
     node: Pin<Box<WaiterNode>>,
 }
 
@@ -749,9 +751,10 @@ impl<T> LocalReceiver<T> {
 
 #[cfg(test)]
 mod test {
+    use futures_lite::stream::{self, StreamExt};
+
     use super::*;
     use crate::enclose;
-    use futures_lite::stream::{self, StreamExt};
 
     #[test]
     fn producer_consumer() {

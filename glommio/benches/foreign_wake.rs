@@ -6,13 +6,12 @@ use std::{
 };
 
 use futures_lite::future::yield_now;
+use glommio::{enclose, prelude::*};
 use hdrhistogram::Histogram;
 use tokio::{
     runtime::{Builder, Handle},
     sync::{mpsc, oneshot},
 };
-
-use glommio::{enclose, prelude::*};
 
 #[derive(Debug, Eq, PartialEq, Hash)]
 enum Metric {

@@ -124,8 +124,9 @@ where
 }
 
 pub mod marker {
-    use super::Node;
     use std::cmp::Ordering;
+
+    use super::Node;
 
     #[derive(Debug)]
     pub struct Spread;
@@ -201,6 +202,7 @@ impl Path {
 
 impl std::convert::TryFrom<Path> for CpuLocation {
     type Error = &'static str;
+
     fn try_from(path: Path) -> Result<Self, Self::Error> {
         let mut cpu = None;
         let mut core = None;

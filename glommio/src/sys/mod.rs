@@ -3,10 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::uring_sys;
-use ahash::AHashMap;
-use log::debug;
-use nix::sys::socket::SockaddrLike;
 use std::{
     fmt, io,
     io::Error,
@@ -18,6 +14,12 @@ use std::{
     task::Waker,
     time::Duration,
 };
+
+use ahash::AHashMap;
+use log::debug;
+use nix::sys::socket::SockaddrLike;
+
+use crate::uring_sys;
 
 pub(super) mod blocking;
 pub(crate) mod hardware_topology;
@@ -177,11 +179,13 @@ pub(crate) mod source;
 pub(crate) mod sysfs;
 mod uring;
 
+use std::{convert::TryFrom, ops::Deref, sync::atomic::AtomicBool};
+
+use smallvec::SmallVec;
+
 pub use self::dma_buffer::DmaBuffer;
 pub(crate) use self::{source::*, uring::*};
 use crate::error::{ExecutorErrorKind, GlommioError};
-use smallvec::SmallVec;
-use std::{convert::TryFrom, ops::Deref, sync::atomic::AtomicBool};
 
 #[derive(Debug, Default)]
 pub(crate) struct ReactorGlobalState {

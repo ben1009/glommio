@@ -148,8 +148,9 @@ impl Latch {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use std::collections::HashSet;
+
+    use super::*;
 
     #[test]
     fn cancel() {

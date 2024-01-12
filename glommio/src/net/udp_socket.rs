@@ -3,15 +3,17 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use super::datagram::GlommioDatagram;
-use nix::sys::socket::{SockaddrLike, SockaddrStorage};
-use socket2::{Domain, Protocol, Socket, Type};
 use std::{
     io,
     net::{self, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6, ToSocketAddrs},
     os::unix::io::{AsRawFd, FromRawFd, RawFd},
     time::Duration,
 };
+
+use nix::sys::socket::{SockaddrLike, SockaddrStorage};
+use socket2::{Domain, Protocol, Socket, Type};
+
+use super::datagram::GlommioDatagram;
 
 type Result<T> = crate::Result<T, ()>;
 
@@ -500,7 +502,7 @@ impl UdpSocket {
         self.socket.peek(buf).await.map_err(Into::into)
     }
 
-    ///Receives a single datagram message on the socket, without removing it
+    /// Receives a single datagram message on the socket, without removing it
     /// from the queue. On success, returns the number of bytes read and the
     /// origin.
     ///
@@ -664,10 +666,12 @@ impl UdpSocket {
 
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
+    use nix::sys::socket::{MsgFlags, SockaddrIn};
+
     use super::*;
     use crate::{timer::Timer, LocalExecutorBuilder};
-    use nix::sys::socket::{MsgFlags, SockaddrIn};
-    use std::time::Duration;
 
     macro_rules! connected_pair {
         () => {{

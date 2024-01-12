@@ -7,6 +7,7 @@
 mod timer_impl;
 
 use std::{future::Future, time::Duration};
+
 pub use timer_impl::{Timer, TimerActionOnce, TimerActionRepeat};
 
 type Result<T> = crate::Result<T, ()>;
@@ -14,8 +15,9 @@ type Result<T> = crate::Result<T, ()>;
 /// Sleep for some time.
 ///
 /// ```
-/// use glommio::{timer::sleep, LocalExecutor};
 /// use std::time::Duration;
+///
+/// use glommio::{timer::sleep, LocalExecutor};
 ///
 /// let ex = LocalExecutor::default();
 ///

@@ -8,9 +8,8 @@ use std::{
     fmt::{self, Debug, Formatter},
     io::{Error, ErrorKind},
     rc::Rc,
+    sync::{Arc, RwLock},
 };
-
-use std::sync::{Arc, RwLock};
 
 use crate::{
     channels::shared_channel::{self, *},
@@ -461,9 +460,8 @@ enum RegisterResult<T: Send> {
 mod tests {
     use futures::future;
 
-    use crate::{enclose, prelude::*};
-
     use super::*;
+    use crate::{enclose, prelude::*};
 
     #[test]
     fn test_channel_mesh() {
