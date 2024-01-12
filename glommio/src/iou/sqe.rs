@@ -6,8 +6,6 @@ use std::{
     ptr,
 };
 
-use super::registrar::{UringFd, UringReadBuf, UringWriteBuf};
-
 use nix::sys::socket::{SockaddrLike, SockaddrStorage};
 pub use nix::{
     fcntl::{FallocateFlags, OFlag, PosixFadviseAdvice},
@@ -20,7 +18,10 @@ pub use nix::{
     },
 };
 
-use super::Personality;
+use super::{
+    registrar::{UringFd, UringReadBuf, UringWriteBuf},
+    Personality,
+};
 use crate::{sys::Statx, uring_sys};
 
 /// A pending IO event.

@@ -23,12 +23,11 @@ pub mod spsc_queue;
 /// The communication between sender and receiver is broken when one of them
 /// goes out of scope. They however behave differently:
 ///
-/// * The [`LocalReceiver`] never sees an error, as it provides a stream
-///   interface compatible with [`StreamExt`]. When the sender is no longer
-///   available the receiver's call to [`next`] will return [`None`].
-/// * The [`LocalSender`] will return a
-///   [`GlommioError::Closed(..)`](crate::GlommioError::Closed) if it tries to
-///   [`send`] into a channel that no longer has a receiver.
+/// * The [`LocalReceiver`] never sees an error, as it provides a stream interface compatible with
+///   [`StreamExt`]. When the sender is no longer available the receiver's call to [`next`] will
+///   return [`None`].
+/// * The [`LocalSender`] will return a [`GlommioError::Closed(..)`](crate::GlommioError::Closed) if
+///   it tries to [`send`] into a channel that no longer has a receiver.
 ///
 /// # Examples
 ///
@@ -113,12 +112,12 @@ pub mod local_channel;
 /// The communication between sender and receiver is broken when one of them
 /// goes out of scope. They however behave differently:
 ///
-/// * The [`ConnectedReceiver`] never sees an error, as it is implemented as a
-///   stream interface compatible with [`StreamExt`]. When the sender is no
-///   longer available the receiver's call to [`next`] will return [`None`].
+/// * The [`ConnectedReceiver`] never sees an error, as it is implemented as a stream interface
+///   compatible with [`StreamExt`]. When the sender is no longer available the receiver's call to
+///   [`next`] will return [`None`].
 /// * The [`ConnectedSender`] will return a
-///   [`GlommioError::Closed(..)`](crate::GlommioError::Closed) if it tries to
-///   [`send`] into a channel that no longer has a receiver.
+///   [`GlommioError::Closed(..)`](crate::GlommioError::Closed) if it tries to [`send`] into a
+///   channel that no longer has a receiver.
 ///
 /// # Examples
 ///

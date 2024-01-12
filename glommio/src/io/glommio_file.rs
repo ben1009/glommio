@@ -4,13 +4,6 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
 
-use crate::{
-    io::sched::FileScheduler,
-    reactor::Reactor,
-    sys::{self, Statx},
-    GlommioError,
-};
-use log::debug;
 use std::{
     cell::{Ref, RefCell},
     convert::TryInto,
@@ -18,6 +11,15 @@ use std::{
     os::unix::io::{AsRawFd, FromRawFd, RawFd},
     path::{Path, PathBuf},
     rc::{Rc, Weak},
+};
+
+use log::debug;
+
+use crate::{
+    io::sched::FileScheduler,
+    reactor::Reactor,
+    sys::{self, Statx},
+    GlommioError,
 };
 
 type Result<T> = crate::Result<T, ()>;
@@ -330,7 +332,8 @@ impl GlommioFile {
     }
 }
 
-/// This lets you open a DmaFile on one thread and then send it safely to another thread for processing.
+/// This lets you open a DmaFile on one thread and then send it safely to another thread for
+/// processing.
 #[derive(Debug)]
 pub(crate) struct OwnedGlommioFile {
     pub(crate) fd: Option<RawFd>,
@@ -403,9 +406,10 @@ impl From<GlommioFile> for OwnedGlommioFile {
 
 #[cfg(test)]
 pub(crate) mod test {
+    use std::time::Duration;
+
     use super::*;
     use crate::{test_utils::*, timer::sleep};
-    use std::time::Duration;
 
     #[test]
     fn drop_closes_the_file() {

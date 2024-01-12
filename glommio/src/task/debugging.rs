@@ -2,12 +2,13 @@
 //! third-party code to introspect into the state of the scheduler.
 //! Use the `debugging` feature flag to enable.
 
-use crate::{executor::executor_id, task::header::Header};
 use std::{
     cell::RefCell,
     collections::HashMap,
     time::{Duration, Instant},
 };
+
+use crate::{executor::executor_id, task::header::Header};
 
 thread_local! {
     static DEBUGGER: RefCell<Option<TaskDebugger>> = RefCell::new(None);

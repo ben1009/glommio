@@ -3,15 +3,16 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{
-    io::{dma_file::DmaFile, glommio_file::GlommioFile},
-    sys, GlommioError,
-};
 use std::{
     cell::Ref,
     io,
     os::unix::io::{AsRawFd, FromRawFd, RawFd},
     path::Path,
+};
+
+use crate::{
+    io::{dma_file::DmaFile, glommio_file::GlommioFile},
+    sys, GlommioError,
 };
 
 type Result<T> = crate::Result<T, ()>;

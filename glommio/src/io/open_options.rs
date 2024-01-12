@@ -3,11 +3,12 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
+use std::{io, path::Path};
+
 use crate::io::{
     dma_file::{DmaFile, Result},
     BufferedFile,
 };
-use std::{io, path::Path};
 
 /// Options and flags which can be used to configure how a file is opened.
 ///
@@ -245,11 +246,9 @@ impl OpenOptions {
 
 #[cfg(test)]
 mod test {
-    /*
-    use super::*;
-    use crate::test_utils::*;
-    use crate::{ByteSliceMutExt, Local};
-    */
+    // use super::*;
+    // use crate::test_utils::*;
+    // use crate::{ByteSliceMutExt, Local};
 
     // TODO: add tests
 }

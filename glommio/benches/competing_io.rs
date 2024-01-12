@@ -1,3 +1,10 @@
+use std::{
+    cell::{Cell, RefCell},
+    path::PathBuf,
+    rc::Rc,
+    time::{Duration, Instant},
+};
+
 use futures::future::{join, join_all};
 use futures_lite::AsyncWriteExt;
 use glommio::{
@@ -6,12 +13,6 @@ use glommio::{
     Latency, LocalExecutorBuilder, Placement, Shares,
 };
 use rand::Rng;
-use std::{
-    cell::{Cell, RefCell},
-    path::PathBuf,
-    rc::Rc,
-    time::{Duration, Instant},
-};
 
 fn main() {
     let handle = LocalExecutorBuilder::new(Placement::Fixed(0)).preempt_timer(Duration::from_millis(10))

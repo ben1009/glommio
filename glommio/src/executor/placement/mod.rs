@@ -21,16 +21,13 @@
 //!
 //! For `MaxPack`, `Node`s are selected based on the following decisions (see
 //! `Node::priority_pack`:
-//! 1) if a `Node` is partially saturated (i.e. currently being filled by the
-//!    packing iterator such that some CPUs have been selected and others have
-//!    not), then it takes priority
-//! 2) if the `Node` is not partially saturated, then it is either equally
-//!    saturated with the other `Node`s at its `Level` or one `Node` has a
-//!    greater saturation than the other:
-//!     a) if `Node`s are equally saturated, use the `Node` with the greater
-//!     number of total slots (i.e. greater number of CPUs that are online)
-//!     b) if `Node`s are not equally saturated, use the node with lower
-//!     saturation
+//! 1) if a `Node` is partially saturated (i.e. currently being filled by the packing iterator such
+//!    that some CPUs have been selected and others have not), then it takes priority
+//! 2) if the `Node` is not partially saturated, then it is either equally saturated with the other
+//!    `Node`s at its `Level` or one `Node` has a greater saturation than the other: a) if `Node`s
+//!    are equally saturated, use the `Node` with the greater number of total slots (i.e. greater
+//!    number of CPUs that are online) b) if `Node`s are not equally saturated, use the node with
+//!    lower saturation
 //!
 //! `Node:::select_cpu` is used to recursively proceed through levels in the
 //! tree until a `Cpu` is selected.  The `Nodes` which were traversed in
@@ -47,12 +44,6 @@
 
 mod pq_tree;
 
-use crate::{error::BuilderErrorKind, sys::hardware_topology, CpuLocation, GlommioError};
-
-use pq_tree::{
-    marker::{Pack, Priority, Spread},
-    Level, Node,
-};
 use std::{
     collections::{
         hash_map::RandomState,
@@ -63,6 +54,13 @@ use std::{
     hash::{Hash, Hasher},
     iter::FromIterator,
 };
+
+use pq_tree::{
+    marker::{Pack, Priority, Spread},
+    Level, Node,
+};
+
+use crate::{error::BuilderErrorKind, sys::hardware_topology, CpuLocation, GlommioError};
 
 type Result<T> = crate::Result<T, ()>;
 
@@ -313,8 +311,8 @@ impl FromIterator<CpuLocation> for CpuSet {
 }
 
 impl<'a> IntoIterator for &'a CpuSet {
-    type Item = &'a CpuLocation;
     type IntoIter = Iter<'a, CpuLocation>;
+    type Item = &'a CpuLocation;
 
     #[inline]
     fn into_iter(self) -> Iter<'a, CpuLocation> {
@@ -323,8 +321,8 @@ impl<'a> IntoIterator for &'a CpuSet {
 }
 
 impl IntoIterator for CpuSet {
-    type Item = CpuLocation;
     type IntoIter = IntoIter<CpuLocation>;
+    type Item = CpuLocation;
 
     #[inline]
     fn into_iter(self) -> IntoIter<CpuLocation> {
@@ -468,6 +466,7 @@ impl CpuIter {
 
 impl Iterator for CpuIter {
     type Item = CpuLocation;
+
     fn next(&mut self) -> Option<Self::Item> {
         match self {
             Self::Unbound => None,
@@ -643,6 +642,7 @@ pub struct TopologyIter<T> {
 
 impl<T: Priority> Iterator for TopologyIter<T> {
     type Item = CpuLocation;
+
     fn next(&mut self) -> Option<Self::Item> {
         self.tree.select_cpu().try_into().ok()
     }

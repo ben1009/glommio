@@ -1,3 +1,11 @@
+use std::{
+    cell::Cell,
+    fs,
+    path::PathBuf,
+    rc::Rc,
+    time::{Duration, Instant},
+};
+
 use clap::{App, Arg};
 use futures_lite::{
     stream::{self, StreamExt},
@@ -12,13 +20,6 @@ use glommio::{
     LocalExecutorBuilder, Placement,
 };
 use pretty_bytes::converter;
-use std::{
-    cell::Cell,
-    fs,
-    path::PathBuf,
-    rc::Rc,
-    time::{Duration, Instant},
-};
 
 struct BenchDirectory {
     path: PathBuf,

@@ -1,15 +1,16 @@
-use futures_lite::io::AsyncBufReadExt;
-use glommio::{
-    controllers::{DeadlineQueue, DeadlineSource},
-    io::stdin,
-    prelude::*,
-};
 use std::{
     cell::Cell,
     future::Future,
     pin::Pin,
     rc::Rc,
     time::{Duration, Instant},
+};
+
+use futures_lite::io::AsyncBufReadExt;
+use glommio::{
+    controllers::{DeadlineQueue, DeadlineSource},
+    io::stdin,
+    prelude::*,
 };
 use yansi::Paint;
 

@@ -99,7 +99,7 @@ pub fn get_machine_topology_unsorted() -> io::Result<Vec<CpuLocation>> {
     // id.
 
     // Using BTree over HashMap for 2 reasons:
-    // 1. to keep mapping consitent between different invocations.
+    // 1. to keep mapping consistent between different invocations.
     // 2. to assign smaller virtual core ids to smaller numa node id.
     // numa_node -> (core_id -> [cpu_id])
     let mut node_to_core_to_cpus: BTreeMap<usize, BTreeMap<usize, Vec<usize>>> = BTreeMap::new();

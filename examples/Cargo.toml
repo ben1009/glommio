@@ -6,7 +6,6 @@ publish = false
 edition = "2021"
 
 [dev-dependencies]
-yansi = "~0.5.1"
 clap = "2.33"
 fastrand = "1.4.0"
 futures = "~0.3.5"
@@ -19,6 +18,7 @@ num_cpus = "1.13.0"
 pretty-bytes = "~0.2.2"
 sys-info = "~0.8.0"
 tokio = { version = "1" }
+yansi = "~0.5.1"
 
 [[example]]
 name = "echo"

@@ -1,5 +1,6 @@
-use glommio::prelude::*;
 use std::time::{Duration, Instant};
+
+use glommio::prelude::*;
 
 fn bench_need_preempt() {
     let local_ex = LocalExecutorBuilder::new(Placement::Fixed(0))

@@ -469,7 +469,7 @@ where
         let poll = <F as Future>::poll(Pin::new_unchecked(&mut *raw.future), cx);
         mem::forget(guard);
 
-        //state could be updated after the coll to the poll
+        // state could be updated after the coll to the poll
         state = (*raw.header).state;
 
         let mut ret = false;

@@ -3,15 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2021 Datadog, Inc.
 //
-use crate::{
-    iou::sqe::SockAddrStorage,
-    sys::{
-        DmaBuffer, IoBuffer, OsResult, PollableStatus, ReactorQueue, SourceId, Statx, TimeSpec64,
-        Wakers,
-    },
-    GlommioError, IoRequirements, ReactorErrorKind, RingIoStats, TaskQueueHandle,
-};
-use futures_lite::{future, io};
 use std::{
     cell::{Ref, RefCell, RefMut},
     convert::TryFrom,
@@ -24,6 +15,17 @@ use std::{
     rc::Rc,
     task::{Poll, Waker},
     time::Duration,
+};
+
+use futures_lite::{future, io};
+
+use crate::{
+    iou::sqe::SockAddrStorage,
+    sys::{
+        DmaBuffer, IoBuffer, OsResult, PollableStatus, ReactorQueue, SourceId, Statx, TimeSpec64,
+        Wakers,
+    },
+    GlommioError, IoRequirements, ReactorErrorKind, RingIoStats, TaskQueueHandle,
 };
 
 #[derive(Debug)]

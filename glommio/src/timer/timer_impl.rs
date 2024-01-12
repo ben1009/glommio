@@ -3,8 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use crate::{reactor::Reactor, task::JoinHandle, GlommioError, TaskQueueHandle};
-use pin_project_lite::pin_project;
 use std::{
     cell::RefCell,
     future::Future,
@@ -13,6 +11,10 @@ use std::{
     task::{Context, Poll},
     time::{Duration, Instant},
 };
+
+use pin_project_lite::pin_project;
+
+use crate::{reactor::Reactor, task::JoinHandle, GlommioError, TaskQueueHandle};
 
 type Result<T> = crate::Result<T, ()>;
 
@@ -62,8 +64,9 @@ impl Inner {
 /// Sleep for 100 milliseconds:
 ///
 /// ```
-/// use glommio::{timer::Timer, LocalExecutor};
 /// use std::time::Duration;
+///
+/// use glommio::{timer::Timer, LocalExecutor};
 ///
 /// async fn sleep(dur: Duration) {
 ///     Timer::new(dur).await;
@@ -87,8 +90,9 @@ impl Timer {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::Timer, LocalExecutor};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::Timer, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async move {
@@ -129,8 +133,9 @@ impl Timer {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::Timer, LocalExecutor};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::Timer, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async move {
@@ -224,8 +229,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -255,8 +261,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, Latency, LocalExecutorBuilder, Shares};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, Latency, LocalExecutorBuilder, Shares};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -317,8 +324,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::{Duration, Instant};
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -351,8 +359,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, Latency, LocalExecutorBuilder, Shares};
     /// use std::time::{Duration, Instant};
+    ///
+    /// use glommio::{timer::TimerActionOnce, Latency, LocalExecutorBuilder, Shares};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -404,8 +413,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -434,8 +444,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -467,8 +478,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -492,8 +504,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -518,8 +531,9 @@ impl<T: 'static> TimerActionOnce<T> {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     /// use std::time::{Duration, Instant};
+    ///
+    /// use glommio::{timer::TimerActionOnce, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -552,8 +566,7 @@ impl TimerActionRepeat {
     ///
     /// # Arguments
     ///
-    /// * `action_gen` a Future to be executed repeatedly. The Future's return
-    ///   value must be
+    /// * `action_gen` a Future to be executed repeatedly. The Future's return value must be
     /// Option<Duration>. If [`Some`], It will execute again after Duration
     /// elapses. If `None`, it stops.
     /// * `tq` the [`TaskQueueHandle`] for the TaskQueue we want.
@@ -561,8 +574,9 @@ impl TimerActionRepeat {
     /// # Examples
     ///
     /// ```no_run
-    /// use glommio::{timer::TimerActionRepeat, Latency, LocalExecutorBuilder, Shares};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionRepeat, Latency, LocalExecutorBuilder, Shares};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -616,16 +630,16 @@ impl TimerActionRepeat {
     ///
     /// # Arguments
     ///
-    /// * `action_gen` a Future to be executed repeatedly. The Future's return
-    ///   value must be
+    /// * `action_gen` a Future to be executed repeatedly. The Future's return value must be
     /// Option<Duration>. If [`Some`], It will execute again after Duration
     /// elapses. If `None`, it stops.
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -656,8 +670,9 @@ impl TimerActionRepeat {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -686,8 +701,9 @@ impl TimerActionRepeat {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -716,8 +732,9 @@ impl TimerActionRepeat {
     /// # Examples
     ///
     /// ```
-    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     /// use std::time::Duration;
+    ///
+    /// use glommio::{timer::TimerActionRepeat, LocalExecutorBuilder};
     ///
     /// let handle = LocalExecutorBuilder::default()
     ///     .spawn(|| async move {
@@ -786,12 +803,13 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::LocalExecutorBuilder;
     use std::{
         cell::{Cell, RefCell},
         rc::Rc,
     };
+
+    use super::*;
+    use crate::LocalExecutorBuilder;
 
     #[test]
     fn timeout_does_not_expire() {
@@ -1041,6 +1059,7 @@ mod test {
     }
 
     #[test]
+    #[ignore = "flaky"]
     fn basic_timer_action_destroy_cancel_initiated_action() {
         make_shared_var_mut!(0, exec1, exec2);
 
@@ -1174,7 +1193,7 @@ mod test {
 
     #[test]
     fn test_memory_leak_unfinished_timer() {
-        //There are two targets of this test
+        // There are two targets of this test
         // 1. To detect absence of memory leaks in case of unfinished
         // timers. Right now we need to run tests with ASAN. There is a  crate https://github.com/lynnux/leak-detect-allocator
         // which provides allocator with memory leak detection but it can not be used

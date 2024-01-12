@@ -11,6 +11,7 @@ use core::{
     ptr::NonNull,
     task::{Context, Poll},
 };
+use std::sync::atomic::Ordering;
 
 #[cfg(feature = "debugging")]
 use crate::task::debugging::TaskDebugger;
@@ -18,7 +19,6 @@ use crate::{
     dbg_context,
     task::{header::Header, state::*},
 };
-use std::sync::atomic::Ordering;
 
 /// A handle that awaits the result of a task.
 ///

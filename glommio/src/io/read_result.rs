@@ -2,8 +2,9 @@
 // under the mit/apache-2.0 license, at your convenience
 //
 // this product includes software developed at datadog (https://www.datadoghq.com/). copyright 2020 datadog, inc.
-use crate::io::ScheduledSource;
 use std::{num::NonZeroUsize, ptr::NonNull};
+
+use crate::io::ScheduledSource;
 
 #[derive(Default, Clone, Debug)]
 /// ReadResult encapsulates a buffer, returned by read operations like

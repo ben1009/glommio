@@ -3,7 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use ahash::AHashMap;
 use std::{
     cell::RefCell,
     fs::{canonicalize, read_dir, read_to_string},
@@ -13,6 +12,8 @@ use std::{
     str::FromStr,
     vec::Vec,
 };
+
+use ahash::AHashMap;
 
 thread_local!(static DEV_MAP: RefCell<AHashMap<(usize, usize), BlockDevice>> = RefCell::new(AHashMap::new()));
 
@@ -24,6 +25,7 @@ enum StorageCache {
 
 impl FromStr for StorageCache {
     type Err = String;
+
     fn from_str(data: &str) -> Result<Self, Self::Err> {
         let contents = data.trim_matches('\n');
         match contents {
@@ -51,7 +53,7 @@ pub(crate) struct BlockDevice {
 }
 
 macro_rules! block_property {
-    ( $map:expr, $property:tt, $major:expr, $minor:expr ) => {
+    ($map:expr, $property:tt, $major:expr, $minor:expr) => {
         DEV_MAP.with(|x| {
             let key = ($major, $minor);
             let mut map = x.borrow_mut();
@@ -63,7 +65,7 @@ macro_rules! block_property {
 }
 
 macro_rules! set_block_property {
-    ( $map:expr, $property:tt, $major:expr, $minor:expr, $value:expr ) => {
+    ($map:expr, $property:tt, $major:expr, $minor:expr, $value:expr) => {
         DEV_MAP.with(|x| {
             let key = ($major, $minor);
             let mut map = x.borrow_mut();
@@ -201,8 +203,8 @@ impl BlockDevice {
 ///
 /// The input string has the following characteristics:
 /// * ASCII string terminated with a `\0` or `\n`
-/// * Ranges are separated by commas and whitespaces (see definition of
-///   whitespaces in `ListIterator::skip_delim`)
+/// * Ranges are separated by commas and whitespaces (see definition of whitespaces in
+///   `ListIterator::skip_delim`)
 /// * Repeat range delimiters are allowed (e.g. `,,1,,4-6,, \n\n  ,,\0` is ok)
 /// * If the range has a `used_size` then a `group_size` is required
 ///
@@ -372,6 +374,7 @@ impl ListIterator {
 
 impl Iterator for ListIterator {
     type Item = io::Result<usize>;
+
     fn next(&mut self) -> Option<Self::Item> {
         self.next()
     }
@@ -471,6 +474,7 @@ impl RangeIter<Checked> {
 
 impl Iterator for RangeIter<Checked> {
     type Item = usize;
+
     fn next(&mut self) -> Option<Self::Item> {
         self.next()
     }
@@ -565,6 +569,7 @@ pub(super) mod test_helpers {
 
     impl Iterator for HexBitIterator {
         type Item = usize;
+
         fn next(&mut self) -> Option<Self::Item> {
             self.next()
         }
@@ -800,9 +805,11 @@ mod test {
         assert!(ListIterator::from_str("5-80:0/1\0")?.all(|e| e.is_ok()));
         assert!(ListIterator::from_str(",,1,,4-6,,       ,,\0")?.any(|e| e.is_ok()));
 
-        assert!(ListIterator::from_str("collect_ok_err\0")?
-            .collect_ok::<Vec<_>>()
-            .is_err());
+        assert!(
+            ListIterator::from_str("collect_ok_err\0")?
+                .collect_ok::<Vec<_>>()
+                .is_err()
+        );
 
         Ok(())
     }

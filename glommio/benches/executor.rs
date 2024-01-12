@@ -1,8 +1,9 @@
-use glommio::{enclose, prelude::*};
 use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
+
+use glommio::{enclose, prelude::*};
 
 fn main() {
     let runs: u32 = 100;

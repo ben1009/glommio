@@ -3,23 +3,6 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
-use super::stream::GlommioStream;
-use crate::{
-    net::{
-        stream::{Buffered, NonBuffered, Preallocated, RxBuf},
-        yolo_accept,
-    },
-    reactor::Reactor,
-    GlommioError,
-};
-use futures_lite::{
-    future::poll_fn,
-    io::{AsyncBufRead, AsyncRead, AsyncWrite},
-    stream::{self, Stream},
-};
-use nix::sys::socket::SockaddrStorage;
-use pin_project_lite::pin_project;
-use socket2::{Domain, Protocol, Socket, Type};
 use std::{
     io,
     net::{self, Shutdown, SocketAddr, ToSocketAddrs},
@@ -28,6 +11,25 @@ use std::{
     rc::{Rc, Weak},
     task::{Context, Poll},
     time::Duration,
+};
+
+use futures_lite::{
+    future::poll_fn,
+    io::{AsyncBufRead, AsyncRead, AsyncWrite},
+    stream::{self, Stream},
+};
+use nix::sys::socket::SockaddrStorage;
+use pin_project_lite::pin_project;
+use socket2::{Domain, Protocol, Socket, Type};
+
+use super::stream::GlommioStream;
+use crate::{
+    net::{
+        stream::{Buffered, NonBuffered, Preallocated, RxBuf},
+        yolo_accept,
+    },
+    reactor::Reactor,
+    GlommioError,
 };
 
 type Result<T> = crate::Result<T, ()>;
@@ -49,16 +51,15 @@ type Result<T> = crate::Result<T, ()>;
 ///
 /// There are two approaches to load balancing possible with the `TcpListener`:
 ///
-/// * By default, the ReusePort flag is set in the socket automatically. The OS
-///   already provides some load balancing capabilities with that so you can
-///   simply [`bind`] to the same address from many executors.
+/// * By default, the ReusePort flag is set in the socket automatically. The OS already provides
+///   some load balancing capabilities with that so you can simply [`bind`] to the same address from
+///   many executors.
 ///
-/// * If that is insufficient or otherwise not desirable, it is possible to use
-///   [`shared_accept`] instead of [`accept`]: that returns an object that
-///   implements [`Send`]. You can then use a [`shared_channel`] to send the
-///   accepted connection into multiple executors. The object returned by
-///   [`shared_accept`] can then be bound to its executor with
-///   [`bind_to_executor`], at which point it becomes a standard [`TcpStream`].
+/// * If that is insufficient or otherwise not desirable, it is possible to use [`shared_accept`]
+///   instead of [`accept`]: that returns an object that implements [`Send`]. You can then use a
+///   [`shared_channel`] to send the accepted connection into multiple executors. The object
+///   returned by [`shared_accept`] can then be bound to its executor with [`bind_to_executor`], at
+///   which point it becomes a standard [`TcpStream`].
 ///
 /// Relying on the OS is definitely simpler, but which approach is better
 /// depends on the specific needs of your application.
@@ -324,10 +325,7 @@ impl AcceptedTcpStream {
     /// # Examples
     /// ```no_run
     /// use glommio::{
-    ///     channels::shared_channel,
-    ///     net::TcpListener,
-    ///     LocalExecutor,
-    ///     LocalExecutorBuilder,
+    ///     channels::shared_channel, net::TcpListener, LocalExecutor, LocalExecutorBuilder,
     /// };
     ///
     /// let ex = LocalExecutor::default();
@@ -437,9 +435,9 @@ impl TcpStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use glommio::{net::TcpStream, LocalExecutor};
-    ///
     /// use std::time::Duration;
+    ///
+    /// use glommio::{net::TcpStream, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async move {
@@ -731,12 +729,6 @@ impl<B: RxBuf + Unpin> AsyncWrite for TcpStream<B> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{channels::shared_channel, enclose, timer::Timer, LocalExecutorBuilder};
-    use futures_lite::{
-        io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt},
-        StreamExt,
-    };
     use std::{
         cell::Cell,
         sync::{
@@ -745,6 +737,14 @@ mod tests {
         },
         time::{Duration, Instant},
     };
+
+    use futures_lite::{
+        io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt},
+        StreamExt,
+    };
+
+    use super::*;
+    use crate::{channels::shared_channel, enclose, timer::Timer, LocalExecutorBuilder};
 
     #[test]
     fn tcp_listener_ttl() {

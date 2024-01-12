@@ -4,8 +4,6 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2022 Datadog, Inc.
 //
 
-use crate::executor::TaskQueueHandle;
-use nix::sys;
 use std::{
     fmt,
     sync::{
@@ -15,6 +13,10 @@ use std::{
     thread::{self, JoinHandle},
     time::{Duration, Instant},
 };
+
+use nix::sys;
+
+use crate::executor::TaskQueueHandle;
 
 pub struct StallDetection<'a> {
     executor: usize,
@@ -285,6 +287,12 @@ impl<'detector> Drop for StallDetectorGuard<'detector> {
 
 #[cfg(test)]
 mod test {
+    use std::{
+        sync::{Arc, RwLock},
+        thread,
+        time::Duration,
+    };
+
     use crate::{
         executor::{
             stall::{StallDetection, StallDetectionHandler},
@@ -292,11 +300,6 @@ mod test {
         },
         timer::sleep,
         LocalExecutorBuilder,
-    };
-    use std::{
-        sync::{Arc, RwLock},
-        thread,
-        time::Duration,
     };
 
     #[derive(Debug)]
@@ -367,13 +370,15 @@ mod test {
 
                 exec.yield_task_queue_now().await; // yield the queue
 
-                assert!(stall_handler
-                    .inner
-                    .write()
-                    .unwrap()
-                    .detections
-                    .pop()
-                    .is_some());
+                assert!(
+                    stall_handler
+                        .inner
+                        .write()
+                        .unwrap()
+                        .detections
+                        .pop()
+                        .is_some()
+                );
 
                 // no stall because < 50ms of un-cooperativeness
                 thread::sleep(Duration::from_millis(40));
@@ -393,13 +398,15 @@ mod test {
 
                 exec.yield_task_queue_now().await; // yield the queue
 
-                assert!(stall_handler
-                    .inner
-                    .write()
-                    .unwrap()
-                    .detections
-                    .pop()
-                    .is_some());
+                assert!(
+                    stall_handler
+                        .inner
+                        .write()
+                        .unwrap()
+                        .detections
+                        .pop()
+                        .is_some()
+                );
 
                 // Make sure nothing else was reported
                 exec.yield_task_queue_now().await; // yield the queue

@@ -3,9 +3,10 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
+use std::io::Result;
+
 use futures::future::join_all;
 use glommio::prelude::*;
-use std::io::Result;
 
 async fn hello() {
     let mut tasks = vec![];

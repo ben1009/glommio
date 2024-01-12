@@ -3,6 +3,18 @@
 //
 // This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.
 //
+use std::{
+    cell::Ref,
+    io,
+    os::unix::io::{AsRawFd, RawFd},
+    path::Path,
+    rc::Rc,
+};
+
+use futures_lite::{Stream, StreamExt};
+use nix::sys::statfs::*;
+
+use super::{glommio_file::OwnedGlommioFile, Stat};
 use crate::{
     io::{
         bulk_io::{
@@ -16,17 +28,6 @@ use crate::{
     },
     sys::{self, sysfs, DirectIo, DmaBuffer, DmaSource, PollableStatus},
 };
-use futures_lite::{Stream, StreamExt};
-use nix::sys::statfs::*;
-use std::{
-    cell::Ref,
-    io,
-    os::unix::io::{AsRawFd, RawFd},
-    path::Path,
-    rc::Rc,
-};
-
-use super::{glommio_file::OwnedGlommioFile, Stat};
 
 pub(super) type Result<T> = crate::Result<T, ()>;
 
@@ -95,15 +96,15 @@ impl DmaFile {
     /// symlink is *not* considered to be the same file.
     ///
     /// Files will be considered to be the same if:
-    /// * A file is opened multiple times (different file descriptors, but same
-    ///   file!)
+    /// * A file is opened multiple times (different file descriptors, but same file!)
     /// * they are hard links.
     ///
     /// # Examples
     ///
     /// ```no_run
-    /// use glommio::{io::DmaFile, LocalExecutor};
     /// use std::os::unix::io::AsRawFd;
+    ///
+    /// use glommio::{io::DmaFile, LocalExecutor};
     ///
     /// let ex = LocalExecutor::default();
     /// ex.run(async {
@@ -213,11 +214,8 @@ impl DmaFile {
     /// # Examples
     /// ```no_run
     /// use glommio::{
-    ///   LocalExecutor,
-    ///   io::{
-    ///     OpenOptions,
-    ///     DmaBuffer,
-    ///   }
+    ///     io::{DmaBuffer, OpenOptions},
+    ///     LocalExecutor,
     /// };
     ///
     /// fn populate(buf: &mut DmaBuffer) {
@@ -228,13 +226,13 @@ impl DmaFile {
     /// ex.run(async {
     ///     // A new anonymous file is created within `some_directory/`.
     ///     let file = OpenOptions::new()
-    ///       .create_new(true)
-    ///       .read(true)
-    ///       .write(true)
-    ///       .tmpfile(true)
-    ///       .dma_open("some_directory")
-    ///       .await
-    ///       .unwrap();
+    ///         .create_new(true)
+    ///         .read(true)
+    ///         .write(true)
+    ///         .tmpfile(true)
+    ///         .dma_open("some_directory")
+    ///         .await
+    ///         .unwrap();
     ///
     ///     let file2 = file.dup().unwrap();
     ///
@@ -318,13 +316,14 @@ impl DmaFile {
     ///
     /// # Examples
     /// ```no_run
+    /// use std::rc::Rc;
+    ///
     /// use futures::join;
     /// use glommio::{
     ///     io::{DmaBuffer, DmaFile},
     ///     timer::sleep,
     ///     LocalExecutor,
     /// };
-    /// use std::rc::Rc;
     ///
     /// fn populate(buf: &mut DmaBuffer) {
     ///     buf.as_bytes_mut()[0..5].copy_from_slice(b"hello");
@@ -482,10 +481,10 @@ impl DmaFile {
         }
     }
 
-    /// Copies a file range from one file to another in kernel space. This is going to have the same performance
-    /// characteristic as splice except if both files are on the same filesystem and the filesystem supports reflinks.
-    /// In that case, the underlying disk blocks will be CoW linked instead of actually performing a copy.
-    /// Since `copy_file_range` is not yet implemented on io_uring (https://github.com/axboe/liburing/issues/831),
+    /// Copies a file range from one file to another in kernel space. This is going to have the same
+    /// performance characteristic as splice except if both files are on the same filesystem and
+    /// the filesystem supports reflinks. In that case, the underlying disk blocks will be CoW
+    /// linked instead of actually performing a copy. Since `copy_file_range` is not yet implemented on io_uring (https://github.com/axboe/liburing/issues/831),
     /// this is just a dispatch to the blocking thread pool to do the syscall.
     pub async fn copy_file_range_aligned(
         &self,
@@ -641,8 +640,8 @@ impl DmaFile {
 }
 
 #[derive(Debug)]
-/// Takes ownership of internal state of the [`DmaFile`] that can be sent to an executor running on a different thread.
-/// In the other thread, you'd convert this back into a [`DmaFile`].
+/// Takes ownership of internal state of the [`DmaFile`] that can be sent to an executor running on
+/// a different thread. In the other thread, you'd convert this back into a [`DmaFile`].
 ///
 /// # Examples
 /// ```no_run
@@ -774,17 +773,19 @@ impl AsRawFd for OwnedDmaFile {
 
 #[cfg(test)]
 pub(crate) mod test {
+    use std::{cell::RefCell, convert::TryInto, path::PathBuf, time::Duration};
+
+    use futures::join;
+    use futures_lite::{stream, StreamExt};
+    use rand::{seq::SliceRandom, thread_rng};
+
     use super::*;
     use crate::{
         enclose, test_utils::make_test_directories, ByteSliceMutExt, Latency, LocalExecutor, Shares,
     };
-    use futures::join;
-    use futures_lite::{stream, StreamExt};
-    use rand::{seq::SliceRandom, thread_rng};
-    use std::{cell::RefCell, convert::TryInto, path::PathBuf, time::Duration};
 
     macro_rules! dma_file_test {
-        ( $name:ident, $dir:ident, $kind:ident, $code:block) => {
+        ($name:ident, $dir:ident, $kind:ident, $code:block) => {
             #[test]
             fn $name() {
                 for dir in make_test_directories(&format!("dma-{}", stringify!($name))) {
