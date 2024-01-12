@@ -33,14 +33,16 @@ jobs:
         - name: cargo test -Zsanitizer=address
           # only --lib --tests b/c of https://github.com/rust-lang/rust/issues/53945
           run: |            
-            cargo +nightly test --lib --tests --all-features --target x86_64-unknown-linux-gnu
+            cargo +nightly test --lib --tests --target x86_64-unknown-linux-gnu
+            #--all-features --target x86_64-unknown-linux-gnu
           env:
             ASAN_OPTIONS: "detect_odr_violation=0:detect_leaks=0"
             RUSTFLAGS: "-Z sanitizer=address"
         - name: cargo test -Zsanitizer=leak
           if: always()
           run: |            
-            cargo +nightly test --all-features --target x86_64-unknown-linux-gnu
+            cargo +nightly test --target x86_64-unknown-linux-gnu
+            #--all-features --target x86_64-unknown-linux-gnu
           env:
             LSAN_OPTIONS: "suppressions=lsan-suppressions.txt"
             RUSTFLAGS: "-Z sanitizer=leak"

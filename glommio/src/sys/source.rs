@@ -42,7 +42,7 @@ pub(crate) enum SourceType {
         MaybeUninit<nix::sys::socket::sockaddr_storage>,
     ),
     SockSendMsg(
-        DmaBuffer,
+        #[allow(dead_code)] DmaBuffer,
         libc::iovec,
         libc::msghdr,
         nix::sys::socket::SockaddrStorage,

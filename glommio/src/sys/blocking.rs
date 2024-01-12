@@ -152,6 +152,7 @@ pub(super) struct BlockingThreadResp {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct BlockingThread(JoinHandle<()>);
 
 impl BlockingThread {
