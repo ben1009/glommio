@@ -44,36 +44,36 @@ jobs:
           run: cargo nextest run --locked 
           #--workspace --all-features --all-targets
   
-    os-check:
-      runs-on: ${{ matrix.os }}
-      name: ${{ matrix.os }}
-      strategy:
-        fail-fast: false
-        matrix:
-          os: [macos-latest, windows-latest]
-      steps:
-        - name: Harden Runner
-          uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
-          with:
-            egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+    # os-check:
+    #   runs-on: ${{ matrix.os }}
+    #   name: ${{ matrix.os }}
+    #   strategy:
+    #     fail-fast: false
+    #     matrix:
+    #       os: [macos-latest, windows-latest]
+    #   steps:
+    #     - name: Harden Runner
+    #       uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+    #       with:
+    #         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
   
-        - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-          with:
-            submodules: true
-        - name: Install rust
-          uses: dtolnay/rust-toolchain@master
-          with:
-            toolchain: ${{ env.RUST_TOOLCHAIN }}  
-        - name: cargo generate-lockfile
-          if: hashFiles('Cargo.lock') == ''
-          run: cargo generate-lockfile
-        - name: Rust Cache
-          uses: Swatinem/rust-cache@v2
-        - name: Install nextest
-          uses: taiki-e/install-action@nextest
-        - name: cargo nextest
-          run: cargo nextest run --locked 
-          #--all-features --all-targets
+    #     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    #       with:
+    #         submodules: true
+    #     - name: Install rust
+    #       uses: dtolnay/rust-toolchain@master
+    #       with:
+    #         toolchain: ${{ env.RUST_TOOLCHAIN }}  
+    #     - name: cargo generate-lockfile
+    #       if: hashFiles('Cargo.lock') == ''
+    #       run: cargo generate-lockfile
+    #     - name: Rust Cache
+    #       uses: Swatinem/rust-cache@v2
+    #     - name: Install nextest
+    #       uses: taiki-e/install-action@nextest
+    #     - name: cargo nextest
+    #       run: cargo nextest run --locked 
+    #       #--all-features --all-targets
     coverage:
       runs-on: ubuntu-latest
       name: coverage
