@@ -4,8 +4,8 @@
 [![docs.rs](https://docs.rs/glommio/badge.svg)](https://docs.rs/glommio/latest/glommio/)
 ![license](https://img.shields.io/crates/l/glommio)
 [![project chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://glommio.zulipchat.com)
-[![CI](https://github.com/DataDog/glommio/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/DataDog/glommio/actions/workflows/ci.yml)
-
+[![Test](https://github.com/ben1009/glommio/actions/workflows/test.yml/badge.svg)](https://github.com/ben1009/glommio/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/ben1009/glommio/branch/master/graph/badge.svg)](https://codecov.io/gh/ben1009/glommio)
 ## Join our Zulip community!
 
 If you are interested in Glommio, consider joining our [Zulip](https://glommio.zulipchat.com) community. Tell us about
