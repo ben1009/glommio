@@ -24,7 +24,7 @@ readme = "../README.md"
 rust-version = "1.65"
 
 [dependencies]
-ahash = "0.7"
+ahash = "0.8.7"
 backtrace = { version = "0.3" }
 bitflags = "2.4"
 bitmaps = "3.1"
@@ -50,7 +50,7 @@ nix = { version = "0.27", features = [
     "time",
 ] }
 pin-project-lite = "0.2"
-rlimit = "0.6"
+rlimit = "0.10.1"
 scoped-tls = "1.0"
 scopeguard = "1.1"
 signal-hook = { version = "0.3" }
