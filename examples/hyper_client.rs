@@ -1,23 +1,23 @@
 // Provide --http1 or --http2 arg in run command
 // cargo run --example hyper_client -- --http1
 mod hyper_compat {
-    use futures_lite::{AsyncRead, AsyncWrite, Future};
     use std::{
+        io,
         io::Write,
+        marker::PhantomData,
         pin::Pin,
         slice,
         task::{Context, Poll},
         vec,
     };
 
+    use futures_lite::{AsyncRead, AsyncWrite, Future};
     use glommio::net::TcpStream;
-
     use http_body_util::BodyExt;
-    use hyper::body::{Body as HttpBody, Bytes, Frame};
-    use hyper::Error;
-    use hyper::Request;
-    use std::io;
-    use std::marker::PhantomData;
+    use hyper::{
+        body::{Body as HttpBody, Bytes, Frame},
+        Error, Request,
+    };
 
     #[derive(Clone)]
     struct HyperExecutor;
@@ -170,7 +170,7 @@ mod hyper_compat {
             while let Some(next) = response.frame().await {
                 let frame = next.unwrap();
                 if let Some(chunk) = frame.data_ref() {
-                    res_buff.write_all(&chunk).unwrap();
+                    res_buff.write_all(chunk).unwrap();
                 }
             }
 
@@ -221,7 +221,7 @@ mod hyper_compat {
             while let Some(next) = response.frame().await {
                 let frame = next.unwrap();
                 if let Some(chunk) = frame.data_ref() {
-                    res_buff.write_all(&chunk).unwrap();
+                    res_buff.write_all(chunk).unwrap();
                 }
             }
 

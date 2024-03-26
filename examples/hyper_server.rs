@@ -1,6 +1,16 @@
 // Provide --http1 or --http2 arg in run command
 // cargo run --example hyper_server -- --http1
 mod hyper_compat {
+    use std::{
+        io,
+        marker::PhantomData,
+        net::SocketAddr,
+        pin::Pin,
+        rc::Rc,
+        slice,
+        task::{Context, Poll},
+    };
+
     use futures_lite::{AsyncRead, AsyncWrite, Future};
     use glommio::{
         enclose,
@@ -11,16 +21,6 @@ mod hyper_compat {
         body::{Body as HttpBody, Bytes, Frame, Incoming},
         service::service_fn,
         Error, Request, Response,
-    };
-
-    use std::{
-        io,
-        marker::PhantomData,
-        net::SocketAddr,
-        pin::Pin,
-        rc::Rc,
-        slice,
-        task::{Context, Poll},
     };
 
     #[derive(Clone)]
@@ -95,6 +95,7 @@ mod hyper_compat {
     impl HttpBody for ResponseBody {
         type Data = Bytes;
         type Error = Error;
+
         fn poll_frame(
             self: Pin<&mut Self>,
             _: &mut Context<'_>,
@@ -172,10 +173,11 @@ mod hyper_compat {
     }
 }
 
+use std::convert::Infallible;
+
 use glommio::{CpuSet, LocalExecutorPoolBuilder, PoolPlacement};
 use hyper::{body::Incoming, Method, Request, Response, StatusCode};
 use hyper_compat::ResponseBody;
-use std::convert::Infallible;
 
 async fn hyper_demo(req: Request<Incoming>) -> Result<Response<ResponseBody>, Infallible> {
     match (req.method(), req.uri().path()) {

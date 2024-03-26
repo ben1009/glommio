@@ -1,3 +1,11 @@
+use std::{
+    cell::Cell,
+    fs,
+    path::PathBuf,
+    rc::Rc,
+    time::{Duration, Instant},
+};
+
 use byte_unit::{Byte, UnitType};
 use clap::{Arg, Command};
 use futures_lite::{
@@ -11,13 +19,6 @@ use glommio::{
         MergedBufferLimit, ReadAmplificationLimit, StreamReaderBuilder, StreamWriterBuilder,
     },
     LocalExecutorBuilder, Placement,
-};
-use std::{
-    cell::Cell,
-    fs,
-    path::PathBuf,
-    rc::Rc,
-    time::{Duration, Instant},
 };
 
 struct BenchDirectory {
