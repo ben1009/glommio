@@ -298,6 +298,7 @@ impl Hash for CpuSet {
     }
 }
 
+#[allow(clippy::unconditional_recursion)]
 impl PartialEq for CpuSet {
     fn eq(&self, other: &Self) -> bool {
         self.0.eq(&other.0)

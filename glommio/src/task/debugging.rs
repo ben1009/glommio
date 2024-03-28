@@ -11,7 +11,7 @@ use std::{
 use crate::{executor::executor_id, task::header::Header};
 
 thread_local! {
-    static DEBUGGER: RefCell<Option<TaskDebugger>> = RefCell::new(None);
+    static DEBUGGER: RefCell<Option<TaskDebugger>> = const { RefCell::new(None) }
 }
 
 /// Provide facilities to inspect the lifecycle of glommio tasks
