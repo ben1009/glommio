@@ -17,6 +17,6 @@ Anything else we should know when reviewing?
 
 ### Checklist
 
-[] I have added unit tests to the code I am submitting
-[] My unit tests cover both failure and success scenarios
-[] If applicable, I have discussed my architecture
+- [ ]  I have added unit tests to the code I am submitting
+- [ ]  My unit tests cover both failure and success scenarios
+- [ ]  If applicable, I have discussed my architecture
